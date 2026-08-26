@@ -1,6 +1,6 @@
 # ContactImporter Google Sheets backend
 
-ContactImporter uses one permanent Google Apps Script Web App as its Google Sheets backend. Spreadsheet parsing still happens in the browser; validated contacts are sent to Google Sheets only when the user explicitly presses **Sync current contacts**.
+ContactImporter uses one permanent Google Apps Script Web App as its Google Sheets backend. Spreadsheet parsing still happens in the browser; validated contacts are sent to Google Sheets only when the user explicitly presses **Sync current campaign**.
 
 ## Production endpoint
 
@@ -12,6 +12,30 @@ https://script.google.com/macros/s/AKfycbyLKEpsopYNkJlMf_65tfOyyPwTeOXUnl-Juk7gX
 
 There is no user-editable backend URL, access-key field, Save configuration control, or Disconnect control in the application. Changing the endpoint requires changing the repository and redeploying ContactImporter.
 
+## Campaign history model
+
+The backend keeps campaign history as a relational structure suitable for AppSheet:
+
+- `Campaigns` contains one row per campaign.
+- `Contacts` contains the contact data plus a `campaign_id` relationship.
+- `SyncLog` records sync activity and the related campaign.
+
+A contact is de-duplicated **inside a campaign**, not globally. This means the same phone number or e-mail can appear in Campaign A and Campaign B without one campaign overwriting the other.
+
+The current contact key is effectively:
+
+```text
+campaign_id + phone
+```
+
+or, when no phone number is available:
+
+```text
+campaign_id + email
+```
+
+The Campaign tab in ContactImporter shows the saved campaign history and lets the user load only the contacts related to a selected campaign.
+
 ## 1. Attach Apps Script to the target Google Sheet
 
 From the Google Sheet that should permanently store ContactImporter data, open:
@@ -22,7 +46,7 @@ Replace the default script with the current `Code.gs` from this folder.
 
 If you use the Apps Script project manifest, enable **Show appsscript.json manifest file in editor** in Project Settings and copy `appsscript.json` as well.
 
-## 2. Initialize the backend
+## 2. Initialize or upgrade the backend
 
 In Apps Script, run:
 
@@ -33,11 +57,14 @@ setupContactImporterBackend
 Approve the Google authorization prompt. The setup function creates or prepares:
 
 - `Contacts`
+- `Campaigns`
 - `SyncLog`
 
-It also permanently stores the target Spreadsheet ID in Script Properties. The permanent backend release no longer uses a frontend access key.
+It also permanently stores the target Spreadsheet ID in Script Properties. Existing Contacts and SyncLog data are preserved because the new campaign columns are appended to the existing tables.
 
-If this Apps Script project previously used the legacy access-key release, `setupContactImporterBackend()` removes the old key automatically. You can also run:
+When upgrading from the older backend, `setupContactImporterBackend()` also rebuilds the Campaigns history from campaign information that still exists in Contacts. Campaigns that were already overwritten by the old global phone/e-mail upsert cannot be reconstructed automatically.
+
+The permanent backend release no longer uses a frontend access key. If this project previously used the legacy access-key release, setup removes the old key automatically. You can also run:
 
 ```text
 removeLegacyContactImporterAccessKey
@@ -58,25 +85,37 @@ Recommended Web App settings:
 
 Keep the same production `/exec` URL so ContactImporter does not need to be changed.
 
-## Backend tab
+## Backend and Campaign tabs
 
-The ContactImporter **Backend** tab is now status/action only. Users can:
+The ContactImporter **Backend** tab is status/action only. Users can:
 
 - test the permanent connection
-- sync current validated contacts
-- load contacts from the permanent Google Sheet
+- sync the current campaign
+- load all contacts from the permanent Google Sheet
+
+The **Campaign** tab now includes Campaign History. Users can:
+
+- see every synced campaign
+- see the number of contact records related to each campaign
+- see source/category and last-sync time
+- open one campaign and load only its contacts into the workspace
 
 Users cannot replace or disconnect the backend.
 
 ## Available operations
 
 - `health` — checks whether the permanent Sheet/backend is ready
-- `upsertContacts` — inserts new contacts and updates matches
-- `listContacts` — loads stored contacts back into ContactImporter
+- `upsertContacts` — inserts or updates contacts within their related campaign
+- `listContacts` — loads contacts, optionally filtered by `campaignId` or campaign name
+- `listCampaigns` — returns campaign history with contact counts and timestamps
 
-Contacts are de-duplicated during backend sync using phone number first, then e-mail when no phone number is available.
+The `Contacts` sheet stores Full Name, Saved Name, Phone, E-mail, Notes, Event / Campaign, Lead Source, Category, Batch Note, saved-name format, timestamps, and `campaign_id`.
 
-The `Contacts` sheet stores Full Name, Saved Name, Phone, E-mail, Notes, Event / Campaign, Lead Source, Category, Batch Note, saved-name format, and created/updated/last-synced timestamps.
+The `Campaigns` sheet stores campaign name, source, category, batch note, saved-name format, contact count, timestamps, and its stable `campaign_id`.
+
+## AppSheet relation
+
+In AppSheet, set `Campaigns[campaign_id]` as the key and configure `Contacts[campaign_id]` as a Ref to `Campaigns`. This lets AppSheet automatically show related contacts under each campaign.
 
 ## Security note
 
