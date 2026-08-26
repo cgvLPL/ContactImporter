@@ -230,7 +230,9 @@
         continue;
       }
 
-      contacts.push({ fullName, phone, email, note });
+      // Keep `note` for the local preview/VCF path and `notes` for the
+      // Google Sheets backend payload, so the mapped value survives both paths.
+      contacts.push({ fullName, phone, email, note, notes: note });
     }
 
     mappingState.textContent = 'Mapping active';
