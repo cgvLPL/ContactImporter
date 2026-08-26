@@ -41,7 +41,7 @@
     backendSection: {
       eyebrow: 'Backend',
       title: 'Google Sheets sync',
-      subtitle: 'Connect your own Apps Script Web App to save and reload validated contacts from Google Sheets.'
+      subtitle: 'Use the permanent managed Apps Script backend to save and reload validated contacts.'
     },
     settingsSection: {
       eyebrow: 'Settings',
@@ -113,8 +113,6 @@
   }
 
   tabButtons.forEach((button, index) => {
-    // The Backend tab is injected after app-core.js initializes, so tab-ui owns
-    // click handling for every tab instead of relying on the older listeners.
     button.addEventListener('click', () => activateTab(button.dataset.target));
 
     button.addEventListener('keydown', (event) => {
