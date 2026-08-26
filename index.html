@@ -130,9 +130,9 @@
                 <div class="section-kicker">Campaign</div>
                 <h2 id="overviewCampaignName">Untitled campaign</h2>
                 <p id="overviewCampaignMeta">Add campaign metadata when you want every exported contact tagged consistently.</p>
-                <button type="button" class="glass-btn" data-open-tab="settingsSection">
+                <button type="button" class="glass-btn" data-open-tab="campaignSection">
                   <i data-lucide="sliders-horizontal"></i>
-                  Edit metadata
+                  Set up campaign
                 </button>
               </div>
             </article>
@@ -235,30 +235,14 @@
               </div>
             </div>
 
-            <div class="campaign-info glass">
-              <div class="section-kicker">How metadata is used</div>
-              <h2>Keep every lead organized.</h2>
-              <p>Campaign information is applied consistently to the exported contacts. Spreadsheet notes stay specific to each contact, while campaign metadata can be applied to the whole batch.</p>
-              <div class="campaign-feature-list">
-                <div><i data-lucide="contact"></i><span><strong>Saved name format</strong><small>Choose whether the campaign appears before or after the name.</small></span></div>
-                <div><i data-lucide="tags"></i><span><strong>Category</strong><small>Stored as a VCF category where supported.</small></span></div>
-                <div><i data-lucide="notebook-pen"></i><span><strong>Contact + marketing notes</strong><small>Mapped contact notes and batch-level additional notes are combined safely in the VCF NOTE field.</small></span></div>
-              </div>
-              <button type="button" class="glass-btn primary" data-open-tab="settingsSection"><i data-lucide="sliders-horizontal"></i>Edit campaign settings</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="tab-panel" id="settingsSection" role="tabpanel" aria-label="Settings" hidden>
-          <div class="settings-layout">
-            <div class="settings-card glass">
+            <div class="campaign-info glass campaign-settings-card">
               <div class="settings-heading">
                 <div>
-                  <div class="section-kicker">Campaign metadata</div>
-                  <h2>Customize exported contacts</h2>
-                  <p>These values apply to every valid contact in the current import. Spreadsheet-mapped Notes remain contact-specific.</p>
+                  <div class="section-kicker">Campaign setup</div>
+                  <h2>Set up a new campaign</h2>
+                  <p>Define the campaign before importing or syncing contacts. These values apply to the current batch and determine how contacts are grouped in campaign history.</p>
                 </div>
-                <div class="settings-icon"><i data-lucide="sliders-horizontal"></i></div>
+                <div class="settings-icon"><i data-lucide="megaphone"></i></div>
               </div>
 
               <div class="form-grid">
@@ -291,6 +275,32 @@
                   <label for="additionalNote">Additional Note</label>
                   <textarea id="additionalNote" placeholder="This batch-level note is added to every exported contact."></textarea>
                 </div>
+              </div>
+
+              <div class="settings-actions campaign-setup-actions">
+                <button type="button" class="glass-btn primary" data-open-tab="importSection"><i data-lucide="file-up"></i>Import contacts</button>
+                <button type="button" class="glass-btn" data-open-tab="contactsSection"><i data-lucide="users-round"></i>Review contacts</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="settingsSection" role="tabpanel" aria-label="Settings" hidden>
+          <div class="settings-layout">
+            <div class="settings-card glass">
+              <div class="settings-heading">
+                <div>
+                  <div class="section-kicker">Export controls</div>
+                  <h2>Export current workspace</h2>
+                  <p>Campaign setup now lives in the Campaign tab. Use this area to refresh the preview, download the current VCF, or reset the workspace.</p>
+                </div>
+                <div class="settings-icon"><i data-lucide="download"></i></div>
+              </div>
+
+              <div class="campaign-feature-list settings-feature-list">
+                <div><i data-lucide="megaphone"></i><span><strong>Campaign metadata</strong><small>Managed from the Campaign tab and applied to this export.</small></span></div>
+                <div><i data-lucide="table-properties"></i><span><strong>Mapped spreadsheet fields</strong><small>Name, phone, e-mail, and per-contact notes stay tied to the current contact set.</small></span></div>
+                <div><i data-lucide="contact-round"></i><span><strong>Bulk VCF</strong><small>All currently valid contacts are written into one import-ready VCF file.</small></span></div>
               </div>
 
               <div class="settings-actions">
