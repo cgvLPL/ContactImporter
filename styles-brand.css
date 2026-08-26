@@ -1,0 +1,26 @@
+.header-logotype {
+  display:block;
+  width:min(360px, 70vw);
+  height:auto;
+  object-fit:contain;
+}
+
+.sidebar-logo-mark {
+  width:40px;
+  height:40px;
+  display:block;
+  flex:none;
+  filter:drop-shadow(0 10px 16px rgba(95,128,255,.24));
+}
+
+.sidebar-brand-text {
+  font-weight:850;
+  letter-spacing:-.045em;
+  color:#142033;
+}
+
+@media (max-width:860px) {
+  .header-logotype {
+    width:min(300px, 78vw);
+  }
+}
