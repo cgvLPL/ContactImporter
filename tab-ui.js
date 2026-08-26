@@ -113,6 +113,10 @@
   }
 
   tabButtons.forEach((button, index) => {
+    // The Backend tab is injected after app-core.js initializes, so tab-ui owns
+    // click handling for every tab instead of relying on the older listeners.
+    button.addEventListener('click', () => activateTab(button.dataset.target));
+
     button.addEventListener('keydown', (event) => {
       if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
       event.preventDefault();
