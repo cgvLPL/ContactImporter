@@ -1,26 +1,105 @@
-.header-logotype {
+.brand-lockup{
+  display:inline-flex;
+  align-items:center;
+  max-width:100%;
+  color:var(--brand-white,#f8f8f6);
+  white-space:nowrap;
+}
+
+.brand-cgv-logo{
   display:block;
-  width:min(360px, 70vw);
-  height:auto;
+  width:auto;
   object-fit:contain;
-}
-
-.sidebar-logo-mark {
-  width:40px;
-  height:40px;
-  display:block;
   flex:none;
-  filter:drop-shadow(0 10px 16px rgba(95,128,255,.24));
 }
 
-.sidebar-brand-text {
-  font-weight:850;
-  letter-spacing:-.045em;
-  color:#142033;
+.brand-lockup-divider{
+  display:block;
+  width:2px;
+  flex:none;
+  border-radius:999px;
+  background:linear-gradient(180deg,var(--brand-amber,#ffb11f),var(--brand-orange,#ff6a22) 58%,var(--brand-red,#e6322f));
+  box-shadow:0 0 18px rgba(255,106,34,.15);
 }
 
-@media (max-width:860px) {
-  .header-logotype {
-    width:min(300px, 78vw);
+.brand-product-name{
+  display:block;
+  color:var(--brand-white,#f8f8f6);
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-weight:500;
+  letter-spacing:-.035em;
+  line-height:1;
+}
+
+.brand-lockup-header{
+  gap:15px;
+}
+
+.brand-lockup-header .brand-cgv-logo{
+  height:38px;
+}
+
+.brand-lockup-header .brand-lockup-divider{
+  height:38px;
+}
+
+.brand-lockup-header .brand-product-name{
+  font-size:25px;
+}
+
+.brand-lockup-sidebar{
+  width:100%;
+  gap:12px;
+}
+
+.brand-lockup-sidebar .brand-cgv-logo{
+  height:31px;
+}
+
+.brand-lockup-sidebar .brand-lockup-divider{
+  height:31px;
+}
+
+.brand-lockup-sidebar .brand-product-name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:17px;
+  font-weight:600;
+}
+
+.brand-home{
+  justify-content:flex-start !important;
+}
+
+@media (max-width:860px){
+  .brand-lockup-header{
+    gap:11px;
+  }
+
+  .brand-lockup-header .brand-cgv-logo{
+    height:30px;
+  }
+
+  .brand-lockup-header .brand-lockup-divider{
+    height:30px;
+  }
+
+  .brand-lockup-header .brand-product-name{
+    font-size:20px;
+  }
+}
+
+@media (max-width:420px){
+  .brand-lockup-header .brand-cgv-logo{
+    height:26px;
+  }
+
+  .brand-lockup-header .brand-lockup-divider{
+    height:26px;
+  }
+
+  .brand-lockup-header .brand-product-name{
+    font-size:17px;
   }
 }
