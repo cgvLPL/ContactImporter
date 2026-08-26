@@ -15,7 +15,7 @@
         <option value="">Choose a campaign…</option>
         <option value="__all__">All campaigns</option>
       </select>
-      <span id="campaignHistorySelectMeta">Choose a saved campaign or use the cards below.</span>
+      <span id="campaignHistorySelectMeta">The latest campaign is selected automatically.</span>
     </div>
     <button class="glass-btn primary campaign-history-picker-open" id="campaignHistoryOpenSelected" type="button" disabled>
       <i data-lucide="folder-open"></i>
@@ -60,7 +60,12 @@
     `;
 
     if (current && Array.from(select.options).some(option => option.value === current)) {
+      // Preserve an explicit user selection when history refreshes.
       select.value = current;
+    } else if (campaigns.length) {
+      // Campaign history is rendered newest-first by the backend, so the first
+      // campaign card is the latest synced campaign.
+      select.value = campaigns[0].id;
     }
 
     updatePickerState();
@@ -82,7 +87,7 @@
     openButton.disabled = !hasSelection;
 
     if (!hasSelection) {
-      selectMeta.textContent = 'Choose a saved campaign or use the cards below.';
+      selectMeta.textContent = 'No synced campaigns available yet.';
       return;
     }
 
