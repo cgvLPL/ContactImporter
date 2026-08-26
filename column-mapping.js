@@ -16,7 +16,7 @@
     <div class="mapping-head">
       <div>
         <h3>Choose spreadsheet columns</h3>
-        <p>After uploading a file, map your own columns to Name, Phone Number, and E-mail.</p>
+        <p>After uploading a file, map your own columns to Name, Phone Number, E-mail, and Notes.</p>
       </div>
       <div class="mapping-state" id="mappingState">Waiting for file</div>
     </div>
@@ -42,10 +42,17 @@
           <option value="-1">Not used</option>
         </select>
       </div>
+
+      <div class="mapping-field">
+        <label for="mapNotes"><i data-lucide="notebook-pen"></i> Notes</label>
+        <select id="mapNotes" class="mapping-select" disabled>
+          <option value="-1">Not used</option>
+        </select>
+      </div>
     </div>
 
     <div class="mapping-help">
-      <strong>Required:</strong> choose a Name column and at least one contact method (Phone or E-mail). The three mapped fields must use different columns.
+      <strong>Required:</strong> choose a Name column and at least one contact method (Phone or E-mail). Notes are optional. Every mapped field must use a different column.
     </div>
   `;
 
@@ -59,6 +66,7 @@
   const mapName = document.getElementById('mapName');
   const mapPhone = document.getElementById('mapPhone');
   const mapEmail = document.getElementById('mapEmail');
+  const mapNotes = document.getElementById('mapNotes');
   const mappingState = document.getElementById('mappingState');
   const mappingSummaryPill = document.querySelector('.top-pills .pill:last-child');
   const importSubtitle = importPanel.querySelector('.panel-title p');
@@ -96,6 +104,10 @@
       ],
       email: [
         'email address', 'e mail', 'email', 'alamat email', 'surel', 'mail'
+      ],
+      notes: [
+        'additional notes', 'additional note', 'contact notes', 'contact note', 'notes', 'note',
+        'catatan tambahan', 'catatan', 'keterangan', 'remark', 'remarks', 'komentar', 'comment'
       ]
     };
 
@@ -145,14 +157,17 @@
     mapName.innerHTML = makeColumnOptions(headers, columnCount, false);
     mapPhone.innerHTML = makeColumnOptions(headers, columnCount, true);
     mapEmail.innerHTML = makeColumnOptions(headers, columnCount, true);
+    mapNotes.innerHTML = makeColumnOptions(headers, columnCount, true);
 
     mapName.disabled = false;
     mapPhone.disabled = false;
     mapEmail.disabled = false;
+    mapNotes.disabled = false;
 
     let nameIndex = bestHeaderMatch(headers, 'name');
     let phoneIndex = bestHeaderMatch(headers, 'phone');
     let emailIndex = bestHeaderMatch(headers, 'email');
+    let notesIndex = bestHeaderMatch(headers, 'notes');
 
     // Preserve the original C/D/E behavior as a fallback when headers are not recognizable.
     if (nameIndex < 0 && columnCount > 2) nameIndex = 2;
@@ -162,6 +177,7 @@
     mapName.value = nameIndex >= 0 ? String(nameIndex) : '';
     mapPhone.value = phoneIndex >= 0 ? String(phoneIndex) : '-1';
     mapEmail.value = emailIndex >= 0 ? String(emailIndex) : '-1';
+    mapNotes.value = notesIndex >= 0 ? String(notesIndex) : '-1';
 
     mappingState.textContent = 'Auto-detected';
     mappingState.className = 'mapping-state ready';
@@ -172,7 +188,8 @@
     return {
       name: mapName.value === '' ? -1 : Number(mapName.value),
       phone: Number(mapPhone.value),
-      email: Number(mapEmail.value)
+      email: Number(mapEmail.value),
+      notes: Number(mapNotes.value)
     };
   }
 
@@ -180,7 +197,7 @@
     if (mapping.name < 0) return 'Choose a Name column.';
     if (mapping.phone < 0 && mapping.email < 0) return 'Choose a Phone Number or E-mail column.';
 
-    const used = [mapping.name, mapping.phone, mapping.email].filter(index => index >= 0);
+    const used = [mapping.name, mapping.phone, mapping.email, mapping.notes].filter(index => index >= 0);
     if (new Set(used).size !== used.length) return 'Each mapped field must use a different column.';
 
     return '';
@@ -205,15 +222,16 @@
       const fullName = normalizeIndonesianName(row[mapping.name]);
       const phone = mapping.phone >= 0 ? cleanPhone(row[mapping.phone]) : '';
       const email = mapping.email >= 0 ? cleanValue(row[mapping.email]) : '';
+      const note = mapping.notes >= 0 ? cleanValue(row[mapping.notes]) : '';
 
-      if (!fullName && !phone && !email) continue;
+      if (!fullName && !phone && !email && !note) continue;
 
       if (!fullName || (!phone && !email)) {
         skippedRows++;
         continue;
       }
 
-      contacts.push({ fullName, phone, email });
+      contacts.push({ fullName, phone, email, note });
     }
 
     mappingState.textContent = 'Mapping active';
@@ -227,9 +245,10 @@
     const nameLabel = mapping.name >= 0 ? `${columnLetter(mapping.name)} = Name` : 'Name not mapped';
     const phoneLabel = mapping.phone >= 0 ? `${columnLetter(mapping.phone)} = Phone` : 'No phone';
     const emailLabel = mapping.email >= 0 ? `${columnLetter(mapping.email)} = E-mail` : 'No e-mail';
+    const notesLabel = mapping.notes >= 0 ? `${columnLetter(mapping.notes)} = Notes` : 'No notes';
 
     if (mappingSummaryPill) {
-      mappingSummaryPill.textContent = `${nameLabel} · ${phoneLabel} · ${emailLabel}`;
+      mappingSummaryPill.textContent = `${nameLabel} · ${phoneLabel} · ${emailLabel} · ${notesLabel}`;
     }
   }
 
@@ -262,7 +281,7 @@
     applyMapping(rows);
   };
 
-  [mapName, mapPhone, mapEmail].forEach(select => {
+  [mapName, mapPhone, mapEmail, mapNotes].forEach(select => {
     select.addEventListener('change', () => {
       mappingState.textContent = 'Custom mapping';
       mappingState.className = 'mapping-state ready';
@@ -271,7 +290,7 @@
   });
 
   if (importSubtitle) {
-    importSubtitle.textContent = 'Row 1 is treated as the header. Upload first, then choose which columns contain Name, Phone Number, and E-mail.';
+    importSubtitle.textContent = 'Row 1 is treated as the header. Upload first, then choose which columns contain Name, Phone Number, E-mail, and optional Notes.';
   }
 
   if (mappingSummaryPill) {
