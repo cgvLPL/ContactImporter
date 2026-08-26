@@ -1,0 +1,156 @@
+/* Workflow navigation — Campaign → Import → Contacts → Export, with Backend separated as system. */
+
+.nav-button[data-workflow-step]{
+  position:relative;
+  padding-right:52px !important;
+}
+
+.nav-button[data-workflow-step]::after{
+  content:attr(data-workflow-step);
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  min-width:25px;
+  height:25px;
+  padding:0 6px;
+  display:grid;
+  place-items:center;
+  border-radius:8px;
+  color:var(--brand-subtle,#767d79);
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.08);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.05em;
+  line-height:1;
+}
+
+.nav-button.active[data-workflow-step]::after{
+  color:#fff4e8;
+  background:rgba(255,255,255,.12);
+  border-color:rgba(255,255,255,.16);
+}
+
+.nav-button[data-target="backendSection"]{
+  margin-top:14px !important;
+}
+
+.nav-button[data-target="backendSection"]::before{
+  content:"";
+  position:absolute;
+  left:7px;
+  right:7px;
+  top:-8px;
+  height:1px;
+  background:rgba(255,255,255,.08);
+}
+
+.mobile-workflow-tabs{
+  display:none;
+}
+
+@media(max-width:860px){
+  .workspace-topbar{
+    margin-bottom:10px !important;
+  }
+
+  .mobile-workflow-tabs{
+    position:sticky;
+    top:8px;
+    z-index:40;
+    display:flex;
+    gap:7px;
+    width:100%;
+    margin:0 0 14px;
+    padding:7px;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    scrollbar-width:none;
+    border-radius:18px;
+    background:rgba(8,10,11,.88);
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:0 16px 38px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05);
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+  }
+
+  .mobile-workflow-tabs::-webkit-scrollbar{
+    display:none;
+  }
+
+  .mobile-workflow-tab{
+    min-width:max-content;
+    min-height:42px;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:7px 10px 7px 7px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:13px;
+    appearance:none;
+    -webkit-appearance:none;
+    cursor:pointer;
+    color:var(--brand-muted,#a4aaa6);
+    background:rgba(255,255,255,.035);
+    font:inherit;
+    font-size:10px;
+    font-weight:800;
+    white-space:nowrap;
+    transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease;
+  }
+
+  .mobile-workflow-tab:hover{
+    color:var(--brand-white,#f8f8f6);
+    border-color:rgba(255,139,70,.18);
+  }
+
+  .mobile-workflow-tab.active{
+    color:#fff;
+    border-color:rgba(255,139,70,.24);
+    background:linear-gradient(105deg,var(--brand-amber,#ffb11f),var(--brand-orange,#ff6a22) 58%,var(--brand-red,#e6322f));
+    box-shadow:0 10px 24px rgba(224,57,30,.22),inset 0 1px 0 rgba(255,255,255,.14);
+  }
+
+  .mobile-workflow-tab svg{
+    width:14px;
+    height:14px;
+    flex:none;
+  }
+
+  .mobile-workflow-step{
+    min-width:23px;
+    height:23px;
+    padding:0 5px;
+    display:grid;
+    place-items:center;
+    border-radius:8px;
+    color:inherit;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+    font-size:7px;
+    letter-spacing:.04em;
+  }
+
+  .mobile-workflow-tab.active .mobile-workflow-step{
+    background:rgba(255,255,255,.14);
+    border-color:rgba(255,255,255,.16);
+  }
+}
+
+@media(max-width:560px){
+  .mobile-workflow-tabs{
+    margin-left:-2px;
+    margin-right:-2px;
+    width:calc(100% + 4px);
+    border-radius:16px;
+  }
+
+  .mobile-workflow-tab{
+    min-height:40px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .mobile-workflow-tab{transition:none}
+}
