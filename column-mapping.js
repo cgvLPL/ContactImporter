@@ -169,7 +169,6 @@
     let emailIndex = bestHeaderMatch(headers, 'email');
     let notesIndex = bestHeaderMatch(headers, 'notes');
 
-    // Preserve the original C/D/E behavior as a fallback when headers are not recognizable.
     if (nameIndex < 0 && columnCount > 2) nameIndex = 2;
     if (phoneIndex < 0 && columnCount > 3) phoneIndex = 3;
     if (emailIndex < 0 && columnCount > 4) emailIndex = 4;
@@ -274,7 +273,25 @@
     }
   }
 
-  // Replace the original fixed C/D/E parser with the user-selected mapping parser.
+  function resetMapping() {
+    lastSpreadsheetRows = null;
+    headersSignature = '';
+
+    mapName.innerHTML = '<option value="">Upload a file first</option>';
+    mapPhone.innerHTML = '<option value="-1">Not used</option>';
+    mapEmail.innerHTML = '<option value="-1">Not used</option>';
+    mapNotes.innerHTML = '<option value="-1">Not used</option>';
+
+    [mapName, mapPhone, mapEmail, mapNotes].forEach(select => {
+      select.disabled = true;
+    });
+
+    mappingState.textContent = 'Waiting for file';
+    mappingState.className = 'mapping-state';
+
+    if (mappingSummaryPill) mappingSummaryPill.textContent = 'Custom column mapping';
+  }
+
   parseRows = function(rows) {
     lastSpreadsheetRows = rows;
     setupMapping(rows);
@@ -299,6 +316,7 @@
 
   window.ContactImporterMapping = {
     getMapping,
-    refresh: refreshFromMapping
+    refresh: refreshFromMapping,
+    reset: resetMapping
   };
 })();
