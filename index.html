@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marketing VCF Generator</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+  <div class="orb three"></div>
+
+  <div class="mobile-bar">
+    <div class="mobile-brand" aria-label="ContactImporter">
+      <div class="brand-badge" style="width:30px;height:30px;border-radius:11px;"><i data-lucide="contact-round"></i></div>
+      <span class="mobile-brand-text">ContactImporter</span>
+    </div>
+  </div>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <button type="button" class="brand brand-home" id="brandHome" aria-label="Go to overview">
+        <div class="brand-badge"><i data-lucide="contact-round"></i></div>
+        ContactFlow
+      </button>
+
+      <div class="sidebar-section-title">Workspace</div>
+      <nav class="nav" aria-label="Workspace navigation">
+        <button type="button" class="nav-item nav-button active" data-target="overviewSection">
+          <i data-lucide="layout-dashboard"></i><span>Overview</span>
+        </button>
+        <button type="button" class="nav-item nav-button" data-target="contactsSection">
+          <i data-lucide="users-round"></i><span>Contacts</span>
+        </button>
+        <button type="button" class="nav-item nav-button" data-target="campaignSection">
+          <i data-lucide="megaphone"></i><span>Campaign</span>
+        </button>
+        <button type="button" class="nav-item nav-button" data-target="importSection">
+          <i data-lucide="file-spreadsheet"></i><span>Import</span>
+        </button>
+        <button type="button" class="nav-item nav-button" data-target="settingsSection">
+          <i data-lucide="settings-2"></i><span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-card glass">
+        <div class="icon"><i data-lucide="shield-check"></i></div>
+        <h4>Private by design</h4>
+        <p>Your spreadsheet is processed entirely in your browser. This page does not upload your contacts anywhere.</p>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="topbar topbar-compact" id="overviewSection">
+        <div class="top-pills">
+          <div class="pill glass glow">Local processing</div>
+          <div class="pill glass">C = Name · D = Phone · E = E-mail</div>
+        </div>
+      </div>
+
+      <section class="stats-grid">
+        <div class="stat-card glass accent-blue">
+          <div class="top">Ready Contacts <div class="stat-icon"><i data-lucide="users"></i></div></div>
+          <div class="stat-value" id="validCount">0</div>
+          <div class="stat-note">Eligible for VCF export</div>
+        </div>
+
+        <div class="stat-card glass accent-green">
+          <div class="top">With Phone <div class="stat-icon"><i data-lucide="phone"></i></div></div>
+          <div class="stat-value" id="phoneCount">0</div>
+          <div class="stat-note">Valid contacts with phone</div>
+        </div>
+
+        <div class="stat-card glass accent-orange">
+          <div class="top">With E-mail <div class="stat-icon"><i data-lucide="mail"></i></div></div>
+          <div class="stat-value" id="emailCount">0</div>
+          <div class="stat-note">Valid contacts with e-mail</div>
+        </div>
+
+        <div class="stat-card glass accent-pink">
+          <div class="top">Skipped <div class="stat-icon"><i data-lucide="circle-slash-2"></i></div></div>
+          <div class="stat-value" id="skippedCount">0</div>
+          <div class="stat-note">Rows not meeting the rule</div>
+        </div>
+      </section>
+
+      <section class="dashboard">
+        <div class="panel glass" id="importSection">
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="iconbox"><i data-lucide="file-up"></i></div>
+              <div>
+                <h2>Import spreadsheet</h2>
+                <p>Row 1 is treated as the header. Name capitalization is normalized automatically.</p>
+              </div>
+            </div>
+            <div class="mini-badge">.xlsx · .xls · .csv</div>
+          </div>
+
+          <div class="upload-zone" id="uploadZone" aria-label="Upload spreadsheet">
+            <div class="upload-shine"></div>
+            <div class="upload-content">
+              <div class="upload-icon"><i data-lucide="cloud-upload"></i></div>
+              <h3>Drop your contact file here</h3>
+              <p>Only rows with a <strong>name</strong> and at least one contact method <strong>(phone or e-mail)</strong> will be saved into the final VCF.</p>
+
+              <div class="upload-actions">
+                <button class="glass-btn primary" id="browseBtn" type="button">
+                  <i data-lucide="folder-open"></i>
+                  Browse File
+                </button>
+
+                <button class="glass-btn" id="demoBtn" type="button">
+                  <i data-lucide="sparkles"></i>
+                  Load Demo Data
+                </button>
+              </div>
+
+              <div class="file-chip" id="fileChip"></div>
+            </div>
+
+            <input id="excelFile" type="file" accept=".xlsx,.xls,.csv" hidden />
+          </div>
+
+          <div class="rule glass">
+            <i data-lucide="badge-check"></i>
+            <div>
+              <strong>Export rule:</strong> include a row only if it has
+              <strong>Full Name</strong> and at least one of
+              <strong>Phone Number</strong> or <strong>E-mail</strong>.
+            </div>
+          </div>
+        </div>
+
+        <div class="right-stack">
+          <div class="campaign-card" id="campaignSection">
+            <div class="campaign-kicker">Current campaign</div>
+            <div class="campaign-title" id="heroEvent">Untitled campaign</div>
+            <div class="campaign-meta">
+              <div class="campaign-chip" id="heroSource">No source</div>
+              <div class="campaign-chip" id="heroCategory">No category</div>
+            </div>
+          </div>
+
+          <div class="settings-card glass" id="settingsSection">
+            <div class="section-kicker">Campaign metadata</div>
+
+            <div class="form-grid">
+              <div class="field full">
+                <label for="eventName">Event / Campaign Name</label>
+                <input class="input" id="eventName" type="text" placeholder="Jakarta Expo 2026" />
+              </div>
+
+              <div class="field full">
+                <label for="nameFormat">Saved Contact Name</label>
+                <select id="nameFormat">
+                  <option value="name">Full Name</option>
+                  <option value="event-name">Event — Full Name</option>
+                  <option value="name-event">Full Name — Event</option>
+                  <option value="event-bracket">Full Name [Event]</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="source">Lead Source</label>
+                <input class="input" id="source" type="text" placeholder="Exhibition booth" />
+              </div>
+
+              <div class="field">
+                <label for="category">Category</label>
+                <input class="input" id="category" type="text" placeholder="Hot lead" />
+              </div>
+
+              <div class="field full">
+                <label for="additionalNote">Additional Note</label>
+                <textarea id="additionalNote" placeholder="Met at booth A12. Interested in follow-up."></textarea>
+              </div>
+            </div>
+
+            <div class="settings-actions">
+              <button class="glass-btn primary" id="downloadBtn" type="button" disabled>
+                <i data-lucide="download"></i>
+                Download VCF
+              </button>
+
+              <button class="glass-btn" id="refreshBtn" type="button">
+                <i data-lucide="refresh-cw"></i>
+                Refresh Preview
+              </button>
+
+              <button class="glass-btn danger" id="resetBtn" type="button">
+                <i data-lucide="rotate-ccw"></i>
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="preview-section" id="contactsSection">
+        <div class="preview-card glass">
+          <div class="toolbar">
+            <div>
+              <h2>Contact preview</h2>
+              <p>Only contacts that will actually be written into the VCF are listed here.</p>
+            </div>
+
+            <div class="status" id="statusBadge">Waiting for file</div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="previewTable" style="display:none;">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Saved Name</th>
+                  <th>Phone</th>
+                  <th>E-mail</th>
+                  <th>Event</th>
+                  <th>Source</th>
+                  <th>Category</th>
+                </tr>
+              </thead>
+              <tbody id="previewBody"></tbody>
+            </table>
+
+            <div class="empty-state" id="emptyState">
+              Upload a spreadsheet, drag & drop a file, or click <strong>Load Demo Data</strong> to preview the interface.
+            </div>
+          </div>
+
+          <div class="footer-note">Buttons verified in the page logic: Browse File, Load Demo Data, Download VCF, Refresh Preview, and Reset.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
