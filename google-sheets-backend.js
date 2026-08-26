@@ -36,7 +36,7 @@
           <div>
             <div class="section-kicker">Google Sheets backend</div>
             <h2>Permanent managed connection</h2>
-            <p>ContactImporter is locked to its production Google Apps Script backend. Users cannot replace, disconnect, or edit the backend from this application.</p>
+            <p>ContactImporter is locked to its production Google Apps Script backend. Contacts are now stored with a campaign relationship so the same person can exist in multiple campaign histories without one campaign overwriting another.</p>
           </div>
           <div class="settings-icon"><i data-lucide="database"></i></div>
         </div>
@@ -50,17 +50,17 @@
             </div>
           </div>
           <div class="backend-fixed-row">
-            <div class="backend-fixed-icon"><i data-lucide="sheet"></i></div>
+            <div class="backend-fixed-icon"><i data-lucide="history"></i></div>
             <div>
-              <strong>Google Sheets storage</strong>
-              <span>Validated contacts can be synchronized to the Google Sheet connected to the deployed Apps Script project.</span>
+              <strong>Campaign history</strong>
+              <span>Every sync is related to its campaign. A contact can therefore be saved separately for multiple campaigns.</span>
             </div>
           </div>
           <div class="backend-fixed-row">
-            <div class="backend-fixed-icon"><i data-lucide="mouse-pointer-click"></i></div>
+            <div class="backend-fixed-icon"><i data-lucide="git-branch"></i></div>
             <div>
-              <strong>Manual data transfer</strong>
-              <span>Spreadsheet parsing remains local. Contact data is sent only when Sync current contacts is pressed.</span>
+              <strong>AppSheet-ready relation</strong>
+              <span>The Contacts table stores a campaign_id that relates each contact row to the Campaigns table.</span>
             </div>
           </div>
         </div>
@@ -71,7 +71,7 @@
 
         <div class="backend-security-note">
           <i data-lucide="shield-check"></i>
-          <div><strong>Managed backend.</strong><span>The endpoint cannot be changed through the ContactImporter interface. Changing it requires a new application deployment from the repository.</span></div>
+          <div><strong>Managed backend.</strong><span>Spreadsheet parsing remains local. Data is sent only when Sync current contacts is pressed.</span></div>
         </div>
       </div>
 
@@ -83,11 +83,11 @@
         <div class="backend-status-badge busy" id="backendStatusBadge">Checking</div>
 
         <div class="backend-sync-actions">
-          <button class="glass-btn primary" id="backendSync" type="button"><i data-lucide="cloud-upload"></i>Sync current contacts</button>
-          <button class="glass-btn" id="backendLoad" type="button"><i data-lucide="cloud-download"></i>Load from Google Sheet</button>
+          <button class="glass-btn primary" id="backendSync" type="button"><i data-lucide="cloud-upload"></i>Sync current campaign</button>
+          <button class="glass-btn" id="backendLoad" type="button"><i data-lucide="cloud-download"></i>Load all contacts</button>
         </div>
 
-        <div class="backend-sync-meta" id="backendSyncMeta">Permanent backend · manual sync</div>
+        <div class="backend-sync-meta" id="backendSyncMeta">Permanent backend · campaign-aware manual sync</div>
       </aside>
     </div>
   `;
@@ -95,6 +95,28 @@
   const settingsPanel = document.getElementById('settingsSection');
   if (settingsPanel) tabStage.insertBefore(backendPanel, settingsPanel);
   else tabStage.appendChild(backendPanel);
+
+  const campaignPanel = document.getElementById('campaignSection');
+  let campaignHistoryCard = null;
+  if (campaignPanel) {
+    campaignHistoryCard = document.createElement('section');
+    campaignHistoryCard.className = 'campaign-history-card glass';
+    campaignHistoryCard.innerHTML = `
+      <div class="campaign-history-head">
+        <div>
+          <div class="section-kicker">Synced campaigns</div>
+          <h2>Campaign history</h2>
+          <p>Contacts are separated by campaign in the backend. Select a campaign to load only the contacts related to it.</p>
+        </div>
+        <button class="glass-btn" id="campaignHistoryRefresh" type="button"><i data-lucide="refresh-cw"></i>Refresh history</button>
+      </div>
+      <div class="campaign-history-summary" id="campaignHistorySummary">Checking saved campaigns…</div>
+      <div class="campaign-history-list" id="campaignHistoryList" aria-live="polite">
+        <div class="campaign-history-empty">Campaign history will appear here after the backend is available.</div>
+      </div>
+    `;
+    campaignPanel.appendChild(campaignHistoryCard);
+  }
 
   const testButton = document.getElementById('backendTest');
   const syncButton = document.getElementById('backendSync');
@@ -104,11 +126,9 @@
   const statusBadge = document.getElementById('backendStatusBadge');
   const statusIcon = document.getElementById('backendStatusIcon');
   const syncMeta = document.getElementById('backendSyncMeta');
-
-  const sidebarPrivacy = document.querySelector('.sidebar-card p');
-  if (sidebarPrivacy) {
-    sidebarPrivacy.textContent = 'Your spreadsheet stays in this browser unless you explicitly sync validated contacts to the permanent Google Sheets backend.';
-  }
+  const historyRefreshButton = document.getElementById('campaignHistoryRefresh');
+  const historySummary = document.getElementById('campaignHistorySummary');
+  const historyList = document.getElementById('campaignHistoryList');
 
   function appVersion() {
     const meta = document.querySelector('meta[name="app-version"]');
@@ -116,8 +136,6 @@
   }
 
   function legacyAccessKey() {
-    // Backward compatibility only for browsers that were configured before the
-    // backend became permanent. There is intentionally no UI for changing it.
     try {
       return String(localStorage.getItem(LEGACY_STORAGE_KEY) || '').trim();
     } catch (error) {
@@ -126,10 +144,7 @@
   }
 
   function getConnection() {
-    return Object.freeze({
-      endpoint: FIXED_ENDPOINT,
-      locked: true,
-    });
+    return Object.freeze({ endpoint: FIXED_ENDPOINT, locked: true });
   }
 
   function setBackendStatus(state, title, copy, badge) {
@@ -145,28 +160,22 @@
   }
 
   function setButtonsBusy(busy) {
-    [testButton, syncButton, loadButton].forEach(button => {
-      if (button) button.disabled = Boolean(busy);
+    [testButton, syncButton, loadButton, historyRefreshButton].filter(Boolean).forEach(button => {
+      button.disabled = Boolean(busy);
     });
     backendPanel.classList.toggle('backend-busy', Boolean(busy));
+    if (campaignHistoryCard) campaignHistoryCard.classList.toggle('backend-busy', Boolean(busy));
   }
 
   async function postAction(action, payload = {}) {
-    const body = {
-      action,
-      clientVersion: appVersion(),
-      ...payload,
-    };
-
+    const body = { action, clientVersion: appVersion(), ...payload };
     const legacyKey = legacyAccessKey();
     if (legacyKey) body.accessKey = legacyKey;
 
     const response = await fetch(FIXED_ENDPOINT, {
       method: 'POST',
       redirect: 'follow',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8',
-      },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(body),
     });
 
@@ -179,33 +188,8 @@
       throw new Error('The Apps Script response was not JSON. Confirm the deployment is an active Web App using the production /exec URL.');
     }
 
-    if (!result || result.ok !== true) {
-      throw new Error((result && result.error) || 'The backend returned an error.');
-    }
+    if (!result || result.ok !== true) throw new Error((result && result.error) || 'The backend returned an error.');
     return result;
-  }
-
-  async function testConnection(options = {}) {
-    const quiet = Boolean(options.quiet);
-    setButtonsBusy(true);
-    setBackendStatus('busy', 'Checking backend…', 'Contacting the permanent Google Apps Script deployment.', 'Checking');
-
-    try {
-      const result = await postAction('health');
-      if (result.authRequired && !result.authenticated) {
-        throw new Error('The deployed Apps Script is still using the legacy access-key backend. Update it to the permanent backend release or retain the previously configured browser credential.');
-      }
-      setBackendStatus('success', 'Google Sheets connected', `${result.spreadsheetName || 'Google Sheet'} · ${result.contactsSheet || 'Contacts'} · backend ${result.version || ''}`.trim(), 'Connected');
-      syncMeta.textContent = `Permanent backend · last checked ${new Date().toLocaleTimeString()}`;
-      return true;
-    } catch (error) {
-      console.error('Backend connection test failed:', error);
-      setBackendStatus('error', 'Backend unavailable', error.message || String(error), 'Error');
-      if (!quiet && typeof setStatus === 'function') setStatus('Google Sheets backend unavailable', 'error');
-      return false;
-    } finally {
-      setButtonsBusy(false);
-    }
   }
 
   function currentMarketingSettings() {
@@ -243,6 +227,156 @@
     return `ci-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
+  function formatHistoryDate(value) {
+    if (!value) return 'No sync time';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString();
+  }
+
+  function escapeHistoryHTML(value) {
+    if (typeof escapeHTML === 'function') return escapeHTML(value);
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function aggregateCampaignsFromContacts(rows) {
+    const groups = new Map();
+    rows.forEach(row => {
+      const name = String(row.event || '').trim() || 'Unassigned';
+      const id = String(row.campaignId || '').trim() || `legacy:${name.toLocaleLowerCase()}`;
+      if (!groups.has(id)) {
+        groups.set(id, {
+          campaignId: id,
+          name,
+          source: row.source || '',
+          category: row.category || '',
+          batchNote: row.batchNote || '',
+          nameFormat: row.nameFormat || 'name',
+          contactCount: 0,
+          createdAt: row.createdAt || '',
+          updatedAt: row.updatedAt || '',
+          lastSyncedAt: row.lastSyncedAt || '',
+          legacy: true,
+        });
+      }
+      const group = groups.get(id);
+      group.contactCount += 1;
+      if (String(row.lastSyncedAt || '') > String(group.lastSyncedAt || '')) group.lastSyncedAt = row.lastSyncedAt;
+    });
+    return Array.from(groups.values()).sort((a, b) => String(b.lastSyncedAt || '').localeCompare(String(a.lastSyncedAt || '')));
+  }
+
+  function renderCampaignHistory(campaigns) {
+    if (!historyList || !historySummary) return;
+    const items = Array.isArray(campaigns) ? campaigns : [];
+    const totalContacts = items.reduce((sum, campaign) => sum + Number(campaign.contactCount || 0), 0);
+    historySummary.textContent = `${items.length} campaign${items.length === 1 ? '' : 's'} · ${totalContacts} saved contact record${totalContacts === 1 ? '' : 's'}`;
+
+    if (!items.length) {
+      historyList.innerHTML = '<div class="campaign-history-empty">No synced campaigns yet. Add an Event / Campaign Name, import contacts, then sync the current campaign.</div>';
+      return;
+    }
+
+    historyList.innerHTML = items.map(campaign => {
+      const meta = [campaign.source, campaign.category].filter(Boolean).join(' · ') || 'No source or category';
+      return `
+        <article class="campaign-history-item">
+          <div class="campaign-history-icon"><i data-lucide="megaphone"></i></div>
+          <div class="campaign-history-main">
+            <div class="campaign-history-name">${escapeHistoryHTML(campaign.name || 'Unassigned')}</div>
+            <div class="campaign-history-meta">${escapeHistoryHTML(meta)}</div>
+            <div class="campaign-history-time">Last synced ${escapeHistoryHTML(formatHistoryDate(campaign.lastSyncedAt || campaign.updatedAt))}</div>
+          </div>
+          <div class="campaign-history-count"><strong>${Number(campaign.contactCount || 0)}</strong><span>contacts</span></div>
+          <button class="glass-btn campaign-history-load" type="button"
+            data-campaign-id="${escapeHistoryHTML(campaign.campaignId || '')}"
+            data-campaign-name="${escapeHistoryHTML(campaign.name || 'Unassigned')}">
+            <i data-lucide="folder-open"></i>Open
+          </button>
+        </article>
+      `;
+    }).join('');
+
+    historyList.querySelectorAll('.campaign-history-load').forEach(button => {
+      button.addEventListener('click', () => {
+        loadFromGoogleSheet({
+          campaignId: button.dataset.campaignId || '',
+          campaignName: button.dataset.campaignName || '',
+          openContacts: true,
+        });
+      });
+    });
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  async function refreshCampaignHistory(options = {}) {
+    const quiet = Boolean(options.quiet);
+    if (historySummary) historySummary.textContent = 'Refreshing campaign history…';
+    if (historyRefreshButton) historyRefreshButton.disabled = true;
+
+    try {
+      let campaigns;
+      try {
+        const result = await postAction('listCampaigns');
+        campaigns = Array.isArray(result.campaigns) ? result.campaigns : [];
+      } catch (error) {
+        // Backward-compatible fallback while the new Apps Script release has
+        // not yet been deployed. It can display old data but cannot recover
+        // campaigns that the legacy phone/e-mail upsert already overwrote.
+        const result = await postAction('listContacts', { limit: 5000 });
+        campaigns = aggregateCampaignsFromContacts(Array.isArray(result.contacts) ? result.contacts : []);
+        if (!quiet) console.warn('Using legacy campaign-history fallback:', error);
+      }
+      renderCampaignHistory(campaigns);
+      return campaigns;
+    } catch (error) {
+      console.error('Campaign history load failed:', error);
+      if (historySummary) historySummary.textContent = 'Campaign history unavailable';
+      if (historyList) historyList.innerHTML = `<div class="campaign-history-empty">${escapeHistoryHTML(error.message || String(error))}</div>`;
+      return [];
+    } finally {
+      if (historyRefreshButton) historyRefreshButton.disabled = false;
+    }
+  }
+
+  async function testConnection(options = {}) {
+    const quiet = Boolean(options.quiet);
+    setButtonsBusy(true);
+    setBackendStatus('busy', 'Checking backend…', 'Contacting the permanent Google Apps Script deployment.', 'Checking');
+
+    try {
+      const result = await postAction('health');
+      if (result.authRequired && !result.authenticated) {
+        throw new Error('The deployed Apps Script is still using the legacy access-key backend. Update it to the permanent backend release or retain the previously configured browser credential.');
+      }
+      const campaignAware = String(result.version || '').includes('campaign-history');
+      setBackendStatus(
+        'success',
+        'Google Sheets connected',
+        campaignAware
+          ? `${result.spreadsheetName || 'Google Sheet'} · campaign history enabled · backend ${result.version || ''}`.trim()
+          : `${result.spreadsheetName || 'Google Sheet'} · connected, but Apps Script still needs the campaign-history update.`.trim(),
+        campaignAware ? 'Connected' : 'Update backend'
+      );
+      syncMeta.textContent = `Permanent backend · last checked ${new Date().toLocaleTimeString()}`;
+      refreshCampaignHistory({ quiet: true });
+      return true;
+    } catch (error) {
+      console.error('Backend connection test failed:', error);
+      setBackendStatus('error', 'Backend unavailable', error.message || String(error), 'Error');
+      if (!quiet && typeof setStatus === 'function') setStatus('Google Sheets backend unavailable', 'error');
+      return false;
+    } finally {
+      setButtonsBusy(false);
+    }
+  }
+
   async function syncCurrentContacts() {
     if (!Array.isArray(contacts) || !contacts.length) {
       setBackendStatus('error', 'Nothing to sync', 'Import or load at least one valid contact first.', 'No contacts');
@@ -252,6 +386,7 @@
     setButtonsBusy(true);
     const settings = currentMarketingSettings();
     const outgoing = contacts.map(contact => backendContact(contact, settings));
+    const campaignLabel = settings.event || 'Unassigned';
     let inserted = 0;
     let updated = 0;
     let accepted = 0;
@@ -261,7 +396,7 @@
       for (let start = 0; start < outgoing.length; start += MAX_CLIENT_BATCH) {
         const chunk = outgoing.slice(start, start + MAX_CLIENT_BATCH);
         const end = Math.min(start + chunk.length, outgoing.length);
-        setBackendStatus('busy', `Syncing ${end} of ${outgoing.length}…`, 'Writing validated contacts to the permanent Google Sheet.', 'Syncing');
+        setBackendStatus('busy', `Syncing ${end} of ${outgoing.length}…`, `Saving contacts under “${campaignLabel}”.`, 'Syncing');
         const result = await postAction('upsertContacts', {
           contacts: chunk,
           requestId: `${requestId}-${Math.floor(start / MAX_CLIENT_BATCH) + 1}`,
@@ -271,9 +406,10 @@
         accepted += Number(result.accepted || 0);
       }
 
-      setBackendStatus('success', 'Contacts synced', `${accepted} contact${accepted === 1 ? '' : 's'} saved · ${inserted} new · ${updated} updated.`, 'Synced');
-      syncMeta.textContent = `Permanent backend · last sync ${new Date().toLocaleString()} · ${accepted} contacts`;
-      if (typeof setStatus === 'function') setStatus(`${accepted} contacts synced to Google Sheets`, 'success');
+      setBackendStatus('success', 'Campaign synced', `${accepted} contact${accepted === 1 ? '' : 's'} saved under “${campaignLabel}” · ${inserted} new · ${updated} updated.`, 'Synced');
+      syncMeta.textContent = `Last sync ${new Date().toLocaleString()} · ${campaignLabel} · ${accepted} contacts`;
+      if (typeof setStatus === 'function') setStatus(`${campaignLabel}: ${accepted} contacts synced`, 'success');
+      await refreshCampaignHistory({ quiet: true });
     } catch (error) {
       console.error('Google Sheets sync failed:', error);
       setBackendStatus('error', 'Sync failed', error.message || String(error), 'Error');
@@ -288,52 +424,78 @@
     return values.length === 1 ? values[0] : '';
   }
 
-  function restoreSharedCampaignSettings(items) {
-    const event = uniqueSharedValue(items, 'event');
+  function restoreSharedCampaignSettings(items, preferredName = '') {
+    const event = preferredName && preferredName !== 'Unassigned' ? preferredName : uniqueSharedValue(items, 'event');
     const source = uniqueSharedValue(items, 'source');
     const category = uniqueSharedValue(items, 'category');
     const batchNote = uniqueSharedValue(items, 'batchNote');
     const nameFormat = uniqueSharedValue(items, 'nameFormat');
 
-    if (event && eventNameInput) eventNameInput.value = event;
-    if (source && sourceInput) sourceInput.value = source;
-    if (category && categoryInput) categoryInput.value = category;
-    if (batchNote && noteInput) noteInput.value = batchNote;
+    if (eventNameInput) eventNameInput.value = event || '';
+    if (sourceInput) sourceInput.value = source || '';
+    if (categoryInput) categoryInput.value = category || '';
+    if (noteInput) noteInput.value = batchNote || '';
     if (nameFormat && nameFormatInput && Array.from(nameFormatInput.options).some(option => option.value === nameFormat)) {
       nameFormatInput.value = nameFormat;
     }
   }
 
-  async function loadFromGoogleSheet() {
+  async function loadFromGoogleSheet(options = {}) {
+    const campaignId = String(options.campaignId || '').trim();
+    const campaignName = String(options.campaignName || '').trim();
+    const selectedCampaign = Boolean(campaignId || campaignName);
+
     setButtonsBusy(true);
-    setBackendStatus('busy', 'Loading contacts…', 'Reading saved contacts from the permanent Google Sheet.', 'Loading');
+    setBackendStatus(
+      'busy',
+      selectedCampaign ? `Loading ${campaignName || 'campaign'}…` : 'Loading contacts…',
+      selectedCampaign ? 'Reading only contacts related to this campaign.' : 'Reading all saved contacts from the permanent Google Sheet.',
+      'Loading'
+    );
 
     try {
-      const result = await postAction('listContacts', { limit: 5000 });
-      const rows = Array.isArray(result.contacts) ? result.contacts : [];
+      const payload = { limit: 5000 };
+      if (campaignId && !campaignId.startsWith('legacy:')) payload.campaignId = campaignId;
+      else if (campaignName && campaignName !== 'Unassigned') payload.campaign = campaignName;
+
+      const result = await postAction('listContacts', payload);
+      let rows = Array.isArray(result.contacts) ? result.contacts : [];
+
+      // Older Apps Script versions ignore campaign filters. Filter again in the
+      // browser so the UI still opens a single campaign when possible.
+      if (selectedCampaign && campaignName) {
+        const normalizedName = campaignName.trim().toLocaleLowerCase();
+        rows = rows.filter(row => {
+          const rowName = String(row.event || '').trim() || 'Unassigned';
+          return rowName.toLocaleLowerCase() === normalizedName;
+        });
+      }
+
       const loaded = rows
         .map(row => ({
           fullName: typeof normalizeIndonesianName === 'function' ? normalizeIndonesianName(row.fullName) : String(row.fullName || '').trim(),
           phone: typeof cleanPhone === 'function' ? cleanPhone(row.phone) : String(row.phone || '').trim(),
           email: typeof cleanValue === 'function' ? cleanValue(row.email) : String(row.email || '').trim(),
           notes: typeof cleanValue === 'function' ? cleanValue(row.notes) : String(row.notes || '').trim(),
+          campaignId: row.campaignId || campaignId || '',
         }))
         .filter(contact => contact.fullName && (contact.phone || contact.email));
 
       contacts = loaded;
       skippedRows = 0;
-      restoreSharedCampaignSettings(rows);
+      restoreSharedCampaignSettings(rows, campaignName);
 
       if (typeof updateStats === 'function') updateStats();
       if (typeof updateDownloadState === 'function') updateDownloadState();
       if (typeof updateLiveUI === 'function') updateLiveUI();
       if (typeof renderPreview === 'function') renderPreview();
-      if (typeof setStatus === 'function') setStatus(`${loaded.length} contacts loaded from Google Sheet`, 'success');
 
-      setBackendStatus('success', 'Contacts loaded', `${loaded.length} valid contact${loaded.length === 1 ? '' : 's'} loaded into the current workspace.`, 'Loaded');
-      syncMeta.textContent = `Permanent backend · last load ${new Date().toLocaleString()} · ${loaded.length} contacts`;
+      const label = selectedCampaign ? campaignName || 'Selected campaign' : 'Google Sheet';
+      if (typeof setStatus === 'function') setStatus(`${loaded.length} contacts loaded from ${label}`, 'success');
+      setBackendStatus('success', selectedCampaign ? 'Campaign loaded' : 'Contacts loaded', `${loaded.length} valid contact${loaded.length === 1 ? '' : 's'} loaded${selectedCampaign ? ` from “${campaignName}”` : ''}.`, 'Loaded');
+      syncMeta.textContent = `Last load ${new Date().toLocaleString()} · ${selectedCampaign ? campaignName : 'all campaigns'} · ${loaded.length} contacts`;
 
-      if (window.ContactImporterTabs && typeof window.ContactImporterTabs.open === 'function') {
+      if (options.openContacts !== false && window.ContactImporterTabs && typeof window.ContactImporterTabs.open === 'function') {
         window.ContactImporterTabs.open('contactsSection');
       }
     } catch (error) {
@@ -347,7 +509,8 @@
 
   testButton.addEventListener('click', () => testConnection({ quiet: false }));
   syncButton.addEventListener('click', syncCurrentContacts);
-  loadButton.addEventListener('click', loadFromGoogleSheet);
+  loadButton.addEventListener('click', () => loadFromGoogleSheet({ openContacts: true }));
+  if (historyRefreshButton) historyRefreshButton.addEventListener('click', () => refreshCampaignHistory({ quiet: false }));
 
   if (window.lucide) lucide.createIcons();
 
@@ -355,6 +518,8 @@
     test: testConnection,
     sync: syncCurrentContacts,
     load: loadFromGoogleSheet,
+    loadCampaign: (campaignId, campaignName) => loadFromGoogleSheet({ campaignId, campaignName, openContacts: true }),
+    campaigns: refreshCampaignHistory,
     getConnection,
   });
 
