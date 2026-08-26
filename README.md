@@ -3,12 +3,12 @@
 </p>
 
 <p align="center">
-  Excel/CSV → VCF contact importer with customizable mapping, campaign metadata, and an optional Google Sheets backend.
+  Excel/CSV → VCF contact importer with customizable mapping, campaign metadata, and a permanent Google Sheets backend.
 </p>
 
 # ContactImporter
 
-ContactImporter converts spreadsheet contact data into a single `.vcf` file for bulk import into phone/contact applications. Spreadsheet parsing and VCF generation happen in the browser. An optional Google Apps Script backend can sync validated contacts to a Google Sheet when the user explicitly requests it.
+ContactImporter converts spreadsheet contact data into a single `.vcf` file for bulk import into phone/contact applications. Spreadsheet parsing and VCF generation happen in the browser. A permanent Google Apps Script backend can sync validated contacts to the designated Google Sheet when the user explicitly requests it.
 
 ## Features
 
@@ -24,7 +24,7 @@ ContactImporter converts spreadsheet contact data into a single `.vcf` file for 
 - Generates one bulk VCF file in the browser.
 - Tab-based responsive interface aligned with the CGV Knowledge Academy design system.
 - Forced update prompt for newer GitHub Pages deployments.
-- Optional Google Sheets + Apps Script backend with manual push/pull sync.
+- Permanent Google Sheets + Apps Script backend with manual push/pull sync.
 
 ## Spreadsheet mapping
 
@@ -61,9 +61,9 @@ Each exported contact can include:
 
 Campaign information can also be appended or prepended to the saved contact name.
 
-## Optional Google Sheets backend
+## Permanent Google Sheets backend
 
-ContactImporter includes a Google Apps Script backend in:
+ContactImporter includes the Google Apps Script backend in:
 
 ```text
 google-apps-script/
@@ -72,7 +72,15 @@ google-apps-script/
 └── README.md
 ```
 
-The backend stores validated contacts in a Google Sheet and supports:
+The production frontend is permanently locked to:
+
+```text
+https://script.google.com/macros/s/AKfycbyLKEpsopYNkJlMf_65tfOyyPwTeOXUnl-Juk7gXX4R9nSOj4PmGpdT3ILL0cO-v_5fsw/exec
+```
+
+Users cannot replace, edit, save, or disconnect the backend from the ContactImporter interface. Changing the endpoint requires changing the repository and deploying a new ContactImporter build.
+
+The backend supports:
 
 - connection health checks
 - upsert/sync of current contacts
@@ -80,26 +88,27 @@ The backend stores validated contacts in a Google Sheet and supports:
 - sync history logging
 - de-duplication by phone first, then e-mail
 
-### Quick setup
+### Apps Script setup / update
 
-1. Create a dedicated Google Sheet.
-2. Open **Extensions → Apps Script** from that Sheet.
-3. Copy `google-apps-script/Code.gs` into the project.
+1. Open the Google Sheet that should permanently store ContactImporter data.
+2. Open **Extensions → Apps Script**.
+3. Copy the current `google-apps-script/Code.gs` into the project.
 4. Run `setupContactImporterBackend()` once and authorize it.
-5. Copy the generated backend access key from the execution log.
-6. Deploy the script as a **Web app**, executing as yourself, with access set to **Anyone**.
-7. Copy the deployed `/exec` URL.
-8. In ContactImporter open the **Backend** tab, paste the URL and access key, save, and test the connection.
+5. Use **Deploy → Manage deployments** and update the existing production Web App deployment to the new script version.
+6. Keep **Execute as: Me** and **Who has access: Anyone** so the GitHub Pages frontend can call it.
+7. Keep the same `/exec` URL shown above.
 
-See [`google-apps-script/README.md`](./google-apps-script/README.md) for the full setup guide.
+The permanent backend release no longer requires a frontend-editable access key.
+
+See [`google-apps-script/README.md`](./google-apps-script/README.md) for the full backend guide.
 
 ## Privacy
 
-By default, the uploaded spreadsheet is parsed locally in the browser and is not uploaded anywhere.
+The uploaded spreadsheet is parsed locally in the browser.
 
-If the optional Google Sheets backend is configured, ContactImporter sends only validated contact fields when the user explicitly presses **Sync current contacts**. Automatic upload is not enabled.
+Contact data is sent to Google Sheets only when the user explicitly presses **Sync current contacts**. Automatic upload is not enabled.
 
-The Apps Script endpoint and access key are stored in that browser's `localStorage`; they are not committed to this repository. The access key is a lightweight access guard and should not be treated as equivalent to OAuth or a server-side secret.
+The backend endpoint is fixed in the public frontend source. UI locking prevents ordinary users from changing it in the app, but it is not an authentication boundary; a public Apps Script endpoint can still be called directly by someone who knows the URL.
 
 External CDN assets currently used by the interface include SheetJS and Lucide Icons.
 
