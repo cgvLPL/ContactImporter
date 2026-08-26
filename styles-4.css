@@ -1,0 +1,44 @@
+@media(max-width:860px){
+      .mobile-bar{
+        display:flex;
+        width:calc(100% - 24px);
+        min-height:62px;
+        margin:12px auto 0;
+        padding:10px 14px;
+        border-radius:22px;
+      }
+      .mobile-brand-text{font-size:24px}
+      .shell{
+        width:100%;
+        min-height:100vh;
+        margin:0;
+        border-radius:0;
+        grid-template-columns:1fr;
+      }
+
+      .sidebar{
+        display:none;
+        position:static;
+        height:auto;
+        overflow:visible;
+      }
+      .content{padding:14px}
+      .topbar{flex-direction:column;align-items:flex-start}
+      .topbar-compact{gap:12px}
+      .top-pills{justify-content:flex-start}
+      .right-stack{grid-template-columns:1fr}
+      .form-grid{grid-template-columns:1fr}
+      .field.full{grid-column:auto}
+    }
+
+    @media(max-width:560px){
+      .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
+      .panel,.preview-card,.settings-card,.campaign-card{padding:16px;border-radius:24px}
+      .content{padding:10px}
+      .upload-zone{min-height:240px;border-radius:22px}
+      .upload-content{padding:20px}
+      .upload-content h3{font-size:18px}
+      .glass-btn{width:100%}
+      .upload-actions,.settings-actions{flex-direction:column}
+      .toolbar{flex-direction:column;align-items:flex-start}
+    }
