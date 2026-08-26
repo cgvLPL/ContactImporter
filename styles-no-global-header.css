@@ -3,6 +3,11 @@
   display:none !important;
 }
 
+/* Remove the informational privacy card from the sidebar. */
+.sidebar-card{
+  display:none !important;
+}
+
 .shell{
   margin-top:16px !important;
   min-height:calc(100vh - 32px) !important;
