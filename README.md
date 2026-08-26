@@ -3,53 +3,47 @@
 </p>
 
 <p align="center">
-  A privacy-first Excel/CSV → VCF bulk contact importer with a liquid-glass interface.
+  Excel/CSV → VCF contact importer with customizable mapping, campaign metadata, and an optional Google Sheets backend.
 </p>
 
 # ContactImporter
 
-ContactImporter converts spreadsheet contact data into a single `.vcf` file for bulk import into phone/contact applications. All spreadsheet parsing and VCF generation happen locally in the browser.
+ContactImporter converts spreadsheet contact data into a single `.vcf` file for bulk import into phone/contact applications. Spreadsheet parsing and VCF generation happen in the browser. An optional Google Apps Script backend can sync validated contacts to a Google Sheet when the user explicitly requests it.
 
 ## Features
 
 - Import `.xlsx`, `.xls`, and `.csv` files.
 - Drag-and-drop or file-picker upload.
-- Column C → Full Name.
-- Column D → Phone Number.
-- Column E → E-mail.
+- Custom column mapping for **Name**, **Phone Number**, **E-mail**, and **Notes**.
+- Auto-detects common Indonesian and English contact headers.
 - Exports only rows containing a Full Name plus a Phone Number, E-mail, or both.
 - Normalizes Indonesian-style name capitalization before export.
-- Supports event/campaign name, lead source, category, and additional notes.
+- Supports event/campaign name, lead source, category, batch notes, and per-contact spreadsheet notes.
 - Custom saved-name formats for campaign contacts.
 - Live contact preview and import statistics.
-- Generates one bulk VCF file entirely in the browser.
-- Responsive extreme liquid-glass UI.
+- Generates one bulk VCF file in the browser.
+- Tab-based responsive interface aligned with the CGV Knowledge Academy design system.
+- Forced update prompt for newer GitHub Pages deployments.
+- Optional Google Sheets + Apps Script backend with manual push/pull sync.
 
-## Spreadsheet format
+## Spreadsheet mapping
 
-The first row is treated as the header row.
+The first worksheet is used and row 1 is treated as the header row.
 
-| Column | Field |
-| --- | --- |
-| C | Full Name |
-| D | Phone Number |
-| E | E-mail |
+After import, choose which spreadsheet columns represent:
 
-A row is included only when it matches this rule:
+- Full Name — required
+- Phone Number — optional
+- E-mail — optional
+- Notes — optional
+
+A row is included only when it matches:
 
 ```text
 Full Name AND (Phone Number OR E-mail)
 ```
 
-Examples:
-
-| Full Name | Phone | E-mail | Exported? |
-| --- | --- | --- | --- |
-| Budi Santoso | 08123456789 | budi@example.com | Yes |
-| Siti Rahma | 08123456789 |  | Yes |
-| Andi Pratama |  | andi@example.com | Yes |
-| Rina Putri |  |  | No |
-|  | 08123456789 | user@example.com | No |
+Notes do not make an otherwise invalid row exportable.
 
 ## Name normalization
 
@@ -62,21 +56,56 @@ Each exported contact can include:
 - Event / Campaign Name
 - Lead Source
 - Category
-- Additional Note
+- Per-contact mapped Notes
+- Batch-level Additional Note
 
-The campaign information can also be appended or prepended to the saved contact name.
+Campaign information can also be appended or prepended to the saved contact name.
+
+## Optional Google Sheets backend
+
+ContactImporter includes a Google Apps Script backend in:
+
+```text
+google-apps-script/
+├── Code.gs
+├── appsscript.json
+└── README.md
+```
+
+The backend stores validated contacts in a Google Sheet and supports:
+
+- connection health checks
+- upsert/sync of current contacts
+- loading saved contacts back into ContactImporter
+- sync history logging
+- de-duplication by phone first, then e-mail
+
+### Quick setup
+
+1. Create a dedicated Google Sheet.
+2. Open **Extensions → Apps Script** from that Sheet.
+3. Copy `google-apps-script/Code.gs` into the project.
+4. Run `setupContactImporterBackend()` once and authorize it.
+5. Copy the generated backend access key from the execution log.
+6. Deploy the script as a **Web app**, executing as yourself, with access set to **Anyone**.
+7. Copy the deployed `/exec` URL.
+8. In ContactImporter open the **Backend** tab, paste the URL and access key, save, and test the connection.
+
+See [`google-apps-script/README.md`](./google-apps-script/README.md) for the full setup guide.
 
 ## Privacy
 
-ContactImporter is a static browser app. The uploaded spreadsheet is read locally with JavaScript and is not sent to an application server by the app.
+By default, the uploaded spreadsheet is parsed locally in the browser and is not uploaded anywhere.
+
+If the optional Google Sheets backend is configured, ContactImporter sends only validated contact fields when the user explicitly presses **Sync current contacts**. Automatic upload is not enabled.
+
+The Apps Script endpoint and access key are stored in that browser's `localStorage`; they are not committed to this repository. The access key is a lightweight access guard and should not be treated as equivalent to OAuth or a server-side secret.
 
 External CDN assets currently used by the interface include SheetJS and Lucide Icons.
 
 ## Run locally
 
-Because this is a static app, you can open `index.html` directly in a modern browser or serve the repository with any static web server.
-
-Example:
+Because the frontend is static, it can be served with any static web server.
 
 ```bash
 python3 -m http.server 8080
@@ -90,7 +119,7 @@ http://localhost:8080
 
 ## GitHub Pages deployment
 
-The repository includes a GitHub Actions workflow at:
+The repository includes:
 
 ```text
 .github/workflows/pages.yml
@@ -98,7 +127,7 @@ The repository includes a GitHub Actions workflow at:
 
 Every push to `main` triggers a GitHub Pages deployment.
 
-Expected production URL:
+Production URL:
 
 ```text
 https://cgvlpl.github.io/ContactImporter/
@@ -112,16 +141,30 @@ ContactImporter/
 ├── assets/
 │   ├── logo.svg
 │   └── logo-mark.svg
+├── google-apps-script/
+│   ├── Code.gs
+│   ├── appsscript.json
+│   └── README.md
 ├── index.html
 ├── app.js
 ├── app-core.js
 ├── app-export.js
+├── app-runtime-fix.js
+├── column-mapping.js
+├── google-sheets-backend.js
+├── tab-ui.js
+├── update-check.js
 ├── styles.css
 ├── styles-1.css
 ├── styles-2.css
 ├── styles-3.css
 ├── styles-4.css
-└── styles-brand.css
+├── styles-brand.css
+├── styles-mapping.css
+├── styles-tabs.css
+├── styles-knowledge-academy.css
+├── styles-no-global-header.css
+└── styles-backend.css
 ```
 
 ## Logo assets
