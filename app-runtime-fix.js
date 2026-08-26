@@ -2,18 +2,6 @@
   if (window.__contactImporterRuntimeFixApplied) return;
   window.__contactImporterRuntimeFixApplied = true;
 
-  const excelFile = document.getElementById('excelFile');
-  const uploadZone = document.getElementById('uploadZone');
-  const resetBtn = document.getElementById('resetBtn');
-  const downloadBtn = document.getElementById('downloadBtn');
-  const metadataInputs = [
-    document.getElementById('eventName'),
-    document.getElementById('nameFormat'),
-    document.getElementById('source'),
-    document.getElementById('category'),
-    document.getElementById('additionalNote')
-  ].filter(Boolean);
-
   const setBadge = (message, type = '') => {
     const badge = document.getElementById('statusBadge');
     if (!badge) return;
@@ -30,6 +18,10 @@
 
     const existing = document.querySelector('script[data-xlsx-fallback]');
     if (existing) {
+      if (window.XLSX) {
+        resolve();
+        return;
+      }
       existing.addEventListener('load', resolve, { once: true });
       existing.addEventListener('error', reject, { once: true });
       return;
@@ -38,83 +30,30 @@
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
     script.dataset.xlsxFallback = 'true';
-    script.onload = resolve;
-    script.onerror = () => reject(new Error('Failed to load Excel parser'));
+    script.onload = () => window.XLSX ? resolve() : reject(new Error('Fallback loaded without XLSX global'));
+    script.onerror = () => reject(new Error('Failed to load Excel parser fallback'));
     document.head.appendChild(script);
   });
 
-  const importFile = async (file) => {
-    if (!file) return;
-
+  async function ensureExcelParser() {
     try {
       if (!window.XLSX) {
         setBadge('Loading Excel parser…');
         await loadFallbackXLSX();
       }
 
-      if (typeof readSpreadsheetFile !== 'function') {
-        throw new Error('Spreadsheet reader is not ready');
+      if (window.XLSX) {
+        setBadge('Ready for Excel import', 'success');
+      } else {
+        throw new Error('Excel parser unavailable');
       }
-
-      readSpreadsheetFile(file);
     } catch (error) {
       console.error(error);
-      setBadge('Excel import failed to initialize', 'error');
+      setBadge('Excel parser unavailable — refresh required', 'error');
     }
-  };
-
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      if (typeof resetProgram === 'function') resetProgram();
-    });
   }
 
-  if (downloadBtn) {
-    downloadBtn.addEventListener('click', () => {
-      if (typeof downloadVCF === 'function') downloadVCF();
-    });
-  }
-
-  if (excelFile) {
-    excelFile.addEventListener('change', (event) => {
-      const file = event.target.files && event.target.files[0];
-      importFile(file);
-    });
-  }
-
-  if (uploadZone && excelFile) {
-    uploadZone.addEventListener('click', (event) => {
-      if (event.target.closest('button') || event.target.closest('input')) return;
-      excelFile.click();
-    });
-
-    ['dragenter', 'dragover'].forEach((type) => {
-      uploadZone.addEventListener(type, (event) => {
-        event.preventDefault();
-        uploadZone.classList.add('dragover');
-      });
-    });
-
-    ['dragleave', 'drop'].forEach((type) => {
-      uploadZone.addEventListener(type, (event) => {
-        event.preventDefault();
-        uploadZone.classList.remove('dragover');
-      });
-    });
-
-    uploadZone.addEventListener('drop', (event) => {
-      const file = event.dataTransfer && event.dataTransfer.files[0];
-      importFile(file);
-    });
-  }
-
-  metadataInputs.forEach((element) => {
-    const refresh = () => {
-      if (typeof updateLiveUI === 'function') updateLiveUI();
-    };
-    element.addEventListener('input', refresh);
-    element.addEventListener('change', refresh);
-  });
-
-  setBadge('Ready for Excel import', 'success');
+  // Do not register duplicate file/button listeners here. app-core.js owns
+  // those handlers. This file only guarantees a fallback Excel parser.
+  ensureExcelParser();
 })();
