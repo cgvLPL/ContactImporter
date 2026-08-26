@@ -48,6 +48,7 @@
     .then(() => loadScript('./app-runtime-fix.js'))
     .then(() => loadScript('./column-mapping.js'))
     .then(() => loadScript('./google-sheets-backend.js'))
+    .then(() => loadScript('./tab-rearrange.js'))
     .then(() => loadScript('./tab-ui.js'))
     .then(() => loadScript('./campaign-selector.js'))
     .then(() => loadScript('./campaign-workspace-state.js'))
