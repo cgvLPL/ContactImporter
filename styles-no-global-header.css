@@ -1,0 +1,16 @@
+/* Remove the redundant global header strip. Branding remains in the sidebar. */
+.mobile-bar{
+  display:none !important;
+}
+
+.shell{
+  margin-top:16px !important;
+  min-height:calc(100vh - 32px) !important;
+}
+
+@media(max-width:860px){
+  .shell{
+    margin-top:10px !important;
+    min-height:calc(100vh - 20px) !important;
+  }
+}
