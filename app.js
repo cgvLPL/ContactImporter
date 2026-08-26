@@ -48,6 +48,7 @@
     .then(() => loadScript('./app-runtime-fix.js'))
     .then(() => loadScript('./column-mapping.js'))
     .then(() => loadScript('./google-sheets-backend.js'))
+    .then(() => loadScript('./campaign-selector.js'))
     .then(() => loadScript('./tab-ui.js'))
     .catch((error) => {
       console.error(error);
