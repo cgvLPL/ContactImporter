@@ -4,7 +4,6 @@ let skippedRows = 0;
 const excelFile = document.getElementById("excelFile");
 const uploadZone = document.getElementById("uploadZone");
 const browseBtn = document.getElementById("browseBtn");
-const demoBtn = document.getElementById("demoBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const refreshBtn = document.getElementById("refreshBtn");
 const resetBtn = document.getElementById("resetBtn");
@@ -107,13 +106,6 @@ if (browseBtn && excelFile) {
     // Clear the input so choosing the same file again still triggers change.
     excelFile.value = "";
     excelFile.click();
-  });
-}
-
-if (demoBtn) {
-  demoBtn.addEventListener("click", function(event) {
-    event.stopPropagation();
-    loadDemoData();
   });
 }
 
@@ -303,27 +295,6 @@ function parseRows(rows) {
 
     contacts.push({ fullName, phone, email });
   }
-}
-
-function loadDemoData() {
-  contacts = [
-    { fullName: normalizeIndonesianName("sophia caldwell"), phone: "+628123456789", email: "sophia@example.com" },
-    { fullName: normalizeIndonesianName("emily davis"), phone: "", email: "emily@company.com" },
-    { fullName: normalizeIndonesianName("michael brown"), phone: "+628777654321", email: "" },
-    { fullName: normalizeIndonesianName("john smith"), phone: "+628112223334", email: "john.smith@example.com" }
-  ];
-
-  skippedRows = 2;
-
-  if (fileChip) {
-    fileChip.style.display = "block";
-    fileChip.textContent = "Demo data loaded";
-  }
-
-  if (typeof updateStats === "function") updateStats();
-  if (typeof updateDownloadState === "function") updateDownloadState();
-  if (typeof renderPreview === "function") renderPreview();
-  if (typeof setStatus === "function") setStatus("Demo data loaded", "success");
 }
 
 function cleanValue(value) {
