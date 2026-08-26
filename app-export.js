@@ -42,6 +42,11 @@ function cleanPhone(phone) {
         .replace(/,/g, "\\,");
     }
 
+    function contactNoteValue(contact) {
+      if (!contact) return "";
+      return cleanValue(contact.note || contact.notes || "");
+    }
+
     function buildMarketingNote(settings, contactNote) {
       const lines = [];
       if (contactNote) lines.push("Contact Note: " + contactNote);
@@ -58,7 +63,7 @@ function cleanPhone(phone) {
       contacts.forEach(contact => {
         if (!contact.fullName || (!contact.phone && !contact.email)) return;
         const savedName = buildContactName(contact.fullName, settings.event, settings.nameFormat);
-        const note = buildMarketingNote(settings, contact.note);
+        const note = buildMarketingNote(settings, contactNoteValue(contact));
         vcf += "BEGIN:VCARD\r\n";
         vcf += "VERSION:3.0\r\n";
         vcf += "N:;" + escapeVCF(savedName) + ";;;\r\n";
@@ -116,7 +121,8 @@ function cleanPhone(phone) {
         const tr = document.createElement("tr");
         const phoneHTML = contact.phone ? escapeHTML(contact.phone) : '<span class="mini-badge">No phone</span>';
         const emailHTML = contact.email ? escapeHTML(contact.email) : '<span class="mini-badge">No e-mail</span>';
-        const noteHTML = contact.note ? escapeHTML(contact.note) : '<span class="mini-badge">No notes</span>';
+        const contactNote = contactNoteValue(contact);
+        const noteHTML = contactNote ? escapeHTML(contactNote) : '<span class="mini-badge">No notes</span>';
         tr.innerHTML = `
           <td>${index + 1}</td>
           <td>
@@ -200,7 +206,7 @@ function cleanPhone(phone) {
       updateStats();
       updateDownloadState();
       updateLiveUI();
-      clearPreview("Upload a spreadsheet, drag & drop a file, or click Load Demo Data to preview the interface.");
+      clearPreview("Import a spreadsheet to begin. Valid contacts will appear here after column mapping.");
       setStatus("Waiting for file");
     }
 
