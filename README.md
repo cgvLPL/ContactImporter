@@ -1,12 +1,13 @@
 <p align="center">
-  <img src="./assets/logo.svg" alt="ContactImporter" width="560">
+  <img src="https://commons.wikimedia.org/wiki/Special:FilePath/CGV_logo.svg" alt="CGV" width="145">
+  &nbsp;&nbsp;&nbsp;<strong>│&nbsp;&nbsp;ContactImporter</strong>
 </p>
 
 <p align="center">
   Excel/CSV → VCF contact importer with customizable mapping, campaign metadata, and a permanent Google Sheets backend.
 </p>
 
-# ContactImporter
+# CGV | ContactImporter
 
 ContactImporter converts spreadsheet contact data into a single `.vcf` file for bulk import into phone/contact applications. Spreadsheet parsing and VCF generation happen in the browser. A permanent Google Apps Script backend can sync validated contacts to the designated Google Sheet when the user explicitly requests it.
 
@@ -110,7 +111,7 @@ Contact data is sent to Google Sheets only when the user explicitly presses **Sy
 
 The backend endpoint is fixed in the public frontend source. UI locking prevents ordinary users from changing it in the app, but it is not an authentication boundary; a public Apps Script endpoint can still be called directly by someone who knows the URL.
 
-External CDN assets currently used by the interface include SheetJS and Lucide Icons.
+External CDN assets currently used by the interface include SheetJS and Lucide Icons. The CGV brand mark displayed in the app and README uses the official CGV logo artwork served from Wikimedia Commons.
 
 ## Run locally
 
@@ -176,9 +177,11 @@ ContactImporter/
 └── styles-backend.css
 ```
 
-## Logo assets
+## Branding
 
-- `assets/logo.svg` — full ContactImporter logotype.
+The production lockup is **CGV | ContactImporter**: the official red CGV mark, a warm orange divider, and the ContactImporter wordmark. The same lockup language is used in the web app and README.
+
+- `assets/logo.svg` — legacy/fallback ContactImporter lockup asset.
 - `assets/logo-mark.svg` — square icon/favicon mark.
 
 ## License
