@@ -38,6 +38,11 @@
       title: 'Campaign snapshot',
       subtitle: 'See how your current campaign metadata will identify and organize exported leads.'
     },
+    backendSection: {
+      eyebrow: 'Backend',
+      title: 'Google Sheets sync',
+      subtitle: 'Connect your own Apps Script Web App to save and reload validated contacts from Google Sheets.'
+    },
     settingsSection: {
       eyebrow: 'Settings',
       title: 'Customize the export',
@@ -82,16 +87,12 @@
       if (activeButton) activeButton.focus({ preventScroll: true });
     }
 
-    // Tabs replace scroll-to-section navigation. Keep the page near the workspace top
-    // when a user changes tabs from a long contact table.
     const shell = document.querySelector('.shell');
     if (shell && window.scrollY > shell.offsetTop + 80) {
       window.scrollTo({ top: Math.max(shell.offsetTop - 8, 0), behavior: 'auto' });
     }
   }
 
-  // app-core.js created scroll-based helpers. Replace them with tab behavior so
-  // its existing nav listeners now open panels instead of scrolling to sections.
   window.goToSection = function(targetId) {
     activateTab(targetId);
   };
@@ -108,7 +109,6 @@
   });
 
   if (brandHome) {
-    // Capture makes the brand deterministic even though app-core also attached a listener.
     brandHome.addEventListener('click', () => activateTab('overviewSection'), true);
   }
 
@@ -150,9 +150,6 @@
     input.addEventListener('change', updateCampaignSummary);
   });
 
-  // The old IntersectionObserver can only see the currently displayed panel,
-  // but disconnecting is not possible from here. Keeping one visible panel at a
-  // time prevents scroll-based navigation from resurfacing.
   activateTab('overviewSection');
   updateCampaignSummary();
 
