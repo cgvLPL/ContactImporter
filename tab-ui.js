@@ -3,6 +3,7 @@
   window.__contactImporterTabsReady = true;
 
   const tabButtons = Array.from(document.querySelectorAll('.nav-button[data-target]'));
+  const mobileTabButtons = Array.from(document.querySelectorAll('.mobile-workflow-tab[data-target]'));
   const tabPanels = Array.from(document.querySelectorAll('.tab-panel'));
   const quickLinks = Array.from(document.querySelectorAll('[data-open-tab]'));
   const brandHome = document.getElementById('brandHome');
@@ -20,33 +21,33 @@
   const tabCopy = {
     overviewSection: {
       eyebrow: 'Overview',
-      title: 'Contact workspace',
-      subtitle: 'Import, review, enrich, and export contacts without leaving the browser.'
-    },
-    importSection: {
-      eyebrow: 'Import',
-      title: 'Bring in your spreadsheet',
-      subtitle: 'Upload a file, then choose exactly which columns contain the contact fields.'
-    },
-    contactsSection: {
-      eyebrow: 'Contacts',
-      title: 'Review valid contacts',
-      subtitle: 'Inspect the contacts for the current or loaded campaign before export.'
+      title: 'Campaign contact workspace',
+      subtitle: 'Follow one clear workflow: campaign, import, review, export, then sync when needed.'
     },
     campaignSection: {
-      eyebrow: 'Campaign',
+      eyebrow: 'Campaigns · Step 1',
       title: 'Campaign workspace',
-      subtitle: 'Set up a new campaign, review the current campaign, or open a synced campaign from history.'
+      subtitle: 'Create a new campaign, reopen previous campaign history, or continue the latest synced campaign.'
     },
-    backendSection: {
-      eyebrow: 'Backend',
-      title: 'Google Sheets sync',
-      subtitle: 'Use the permanent managed Apps Script backend to save and reload campaign-related contacts.'
+    importSection: {
+      eyebrow: 'Import · Step 2',
+      title: 'Import campaign contacts',
+      subtitle: 'Upload a spreadsheet, then map exactly which columns contain Name, Phone, E-mail, and Notes.'
+    },
+    contactsSection: {
+      eyebrow: 'Contacts · Step 3',
+      title: 'Review campaign contacts',
+      subtitle: 'Inspect the valid contacts attached to the active campaign before exporting or syncing.'
     },
     settingsSection: {
-      eyebrow: 'Settings',
-      title: 'Export controls',
-      subtitle: 'Refresh the current preview, download the VCF, or reset the workspace.'
+      eyebrow: 'Export · Step 4',
+      title: 'Export campaign contacts',
+      subtitle: 'Refresh the preview, download the current campaign as a VCF, or reset the active workspace.'
+    },
+    backendSection: {
+      eyebrow: 'System',
+      title: 'Google Sheets backend',
+      subtitle: 'Sync the active campaign or load campaign history from the permanent managed backend.'
     }
   };
 
@@ -58,6 +59,17 @@
       button.tabIndex = active ? 0 : -1;
       if (active) button.setAttribute('aria-current', 'page');
       else button.removeAttribute('aria-current');
+    });
+
+    mobileTabButtons.forEach((button) => {
+      const active = button.dataset.target === targetId;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-current', active ? 'page' : 'false');
+      if (!active) button.removeAttribute('aria-current');
+
+      if (active && typeof button.scrollIntoView === 'function') {
+        button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
     });
   }
 
@@ -143,7 +155,7 @@
       const meta = [source, category].filter(Boolean);
       overviewCampaignMeta.textContent = meta.length
         ? meta.join(' · ')
-        : 'Set up a campaign to group contacts consistently in history and export.';
+        : 'Create a campaign first so imported contacts stay grouped correctly in history.';
     }
   }
 
