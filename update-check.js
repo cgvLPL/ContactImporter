@@ -7,8 +7,6 @@
   let updateShown = false;
   let refreshTimer = null;
 
-  // The deployment workflow replaces __BUILD_ID__ with the deployed commit SHA.
-  // Skip update checks for local/source-file usage where no deployed build ID exists.
   if (!currentVersion || currentVersion === '__BUILD_ID__') return;
 
   function injectStyles() {
@@ -28,53 +26,57 @@
         display: grid;
         place-items: center;
         padding: 24px;
+        color: #f8f8f6;
         background:
-          radial-gradient(circle at 18% 14%, rgba(91, 145, 255, .38), transparent 30%),
-          radial-gradient(circle at 84% 18%, rgba(255, 113, 180, .32), transparent 28%),
-          radial-gradient(circle at 76% 82%, rgba(151, 118, 255, .28), transparent 30%),
-          rgba(235, 244, 255, .72);
-        backdrop-filter: blur(36px) saturate(190%);
-        -webkit-backdrop-filter: blur(36px) saturate(190%);
+          radial-gradient(circle at 12% 86%, rgba(255,177,31,.15), transparent 30rem),
+          radial-gradient(circle at 88% 12%, rgba(230,50,47,.18), transparent 34rem),
+          rgba(4,5,6,.82);
+        backdrop-filter: blur(24px) saturate(1.18);
+        -webkit-backdrop-filter: blur(24px) saturate(1.18);
       }
 
       #ci-update-overlay::before,
       #ci-update-overlay::after {
         content: '';
         position: absolute;
-        width: 420px;
-        height: 420px;
+        width: 460px;
+        height: 460px;
         border-radius: 50%;
-        filter: blur(82px);
-        opacity: .52;
+        filter: blur(96px);
+        opacity: .32;
         pointer-events: none;
       }
 
       #ci-update-overlay::before {
-        left: -120px;
-        top: -120px;
-        background: #87b7ff;
+        left: -140px;
+        top: -160px;
+        background: #ffb11f;
       }
 
       #ci-update-overlay::after {
-        right: -120px;
-        bottom: -120px;
-        background: #ff99c8;
+        right: -140px;
+        bottom: -160px;
+        background: #e6322f;
       }
 
       .ci-update-card {
         position: relative;
         width: min(620px, 100%);
         padding: 36px;
-        border-radius: 34px;
+        border-radius: 22px;
         text-align: center;
-        color: #142033;
-        background: linear-gradient(145deg, rgba(255,255,255,.72), rgba(255,255,255,.38));
-        border: 1px solid rgba(255,255,255,.82);
+        color: #f8f8f6;
+        background:
+          radial-gradient(circle at 50% 0, rgba(255,106,34,.12), transparent 22rem),
+          linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.018)),
+          rgba(13,15,16,.86);
+        border: 1px solid rgba(255,255,255,.15);
         box-shadow:
-          0 36px 110px rgba(40, 65, 105, .22),
-          inset 0 1px 0 rgba(255,255,255,.96);
-        backdrop-filter: blur(30px) saturate(200%);
-        -webkit-backdrop-filter: blur(30px) saturate(200%);
+          inset 0 1px 0 rgba(255,255,255,.14),
+          0 28px 72px rgba(0,0,0,.42),
+          0 8px 28px rgba(230,50,47,.08);
+        backdrop-filter: blur(24px) saturate(1.2);
+        -webkit-backdrop-filter: blur(24px) saturate(1.2);
         overflow: hidden;
       }
 
@@ -82,7 +84,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(180deg, rgba(255,255,255,.30), transparent 38%);
+        background: linear-gradient(180deg, rgba(255,255,255,.065), transparent 38%);
         pointer-events: none;
       }
 
@@ -93,10 +95,11 @@
         margin: 0 auto 20px;
         display: grid;
         place-items: center;
-        border-radius: 25px;
+        border-radius: 18px;
         color: #fff;
-        background: linear-gradient(135deg, #6488ff, #9279ff 52%, #ff7fb6);
-        box-shadow: 0 20px 48px rgba(103, 120, 255, .32);
+        background: linear-gradient(105deg, #ffb11f 0%, #ff6a22 52%, #e6322f 100%);
+        border: 1px solid rgba(255,151,75,.24);
+        box-shadow: 0 18px 44px rgba(224,57,30,.28), inset 0 1px 0 rgba(255,255,255,.18);
       }
 
       .ci-update-icon svg {
@@ -115,59 +118,60 @@
 
       .ci-update-kicker {
         margin-bottom: 8px;
-        color: #71809a;
-        font-size: 12px;
-        font-weight: 800;
+        color: #ff8b46;
+        font: 800 12px/1.2 "Helvetica Neue", Helvetica, Arial, sans-serif;
         letter-spacing: .12em;
         text-transform: uppercase;
       }
 
       .ci-update-title {
         margin: 0;
-        font: 800 clamp(30px, 6vw, 48px)/1.02 Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        letter-spacing: -.055em;
+        color: #f8f8f6;
+        font: 700 clamp(30px, 6vw, 48px)/1.02 "Helvetica Neue", Helvetica, Arial, sans-serif;
+        letter-spacing: -.035em;
       }
 
       .ci-update-copy {
         max-width: 470px;
         margin: 16px auto 0;
-        color: #6f7d97;
-        font: 500 14px/1.65 Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #a4aaa6;
+        font: 500 14px/1.65 "Helvetica Neue", Helvetica, Arial, sans-serif;
       }
 
       .ci-update-meta {
         margin: 14px 0 24px;
-        color: #8e9bb0;
-        font: 700 11px/1.4 Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #767d79;
+        font: 700 11px/1.4 "Helvetica Neue", Helvetica, Arial, sans-serif;
       }
 
       .ci-update-button {
         width: 100%;
         min-height: 56px;
-        border: 1px solid rgba(255,255,255,.45);
-        border-radius: 18px;
+        border: 1px solid rgba(255,151,75,.24);
+        border-radius: 12px;
         color: #fff;
         cursor: pointer;
-        font: 800 15px/1 Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: linear-gradient(135deg, #5f80ff, #8977ff 54%, #ff78b3);
-        box-shadow: 0 18px 40px rgba(90, 112, 255, .30);
-        transition: transform .18s ease, box-shadow .18s ease;
+        font: 800 15px/1 "Helvetica Neue", Helvetica, Arial, sans-serif;
+        background: linear-gradient(105deg, #ffb11f 0%, #ff6a22 52%, #e6322f 100%);
+        box-shadow: 0 16px 40px rgba(224,57,30,.24);
+        transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
       }
 
       .ci-update-button:hover {
         transform: translateY(-1px);
-        box-shadow: 0 22px 46px rgba(90, 112, 255, .36);
+        filter: brightness(1.06);
+        box-shadow: 0 20px 48px rgba(230,58,31,.34);
       }
 
       .ci-update-button:focus-visible {
-        outline: 4px solid rgba(95, 128, 255, .22);
+        outline: 2px solid #ff8b46;
         outline-offset: 4px;
       }
 
       @media (max-width: 560px) {
         #ci-update-overlay { padding: 14px; }
-        .ci-update-card { padding: 28px 20px; border-radius: 28px; }
-        .ci-update-icon { width: 66px; height: 66px; border-radius: 22px; }
+        .ci-update-card { padding: 28px 20px; border-radius: 20px; }
+        .ci-update-icon { width: 66px; height: 66px; border-radius: 16px; }
       }
     `;
     document.head.appendChild(style);
@@ -219,7 +223,6 @@
       button.focus({ preventScroll: true });
     }
 
-    // Prevent keyboard dismissal/navigation around the blocked app.
     document.addEventListener('keydown', (event) => {
       if (!updateShown) return;
       if (event.key === 'Escape') event.preventDefault();
@@ -257,12 +260,10 @@
         showUpdateScreen(latestVersion);
       }
     } catch (error) {
-      // An unavailable version endpoint should never break the main app.
       console.debug('ContactImporter update check skipped:', error);
     }
   }
 
-  // Check shortly after load, then continuously while the page remains open.
   window.setTimeout(checkForUpdate, 2500);
   window.setInterval(checkForUpdate, CHECK_INTERVAL_MS);
 
