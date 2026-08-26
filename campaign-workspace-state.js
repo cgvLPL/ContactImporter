@@ -84,6 +84,12 @@
       return false;
     }
 
+    // The spreadsheet mapper historically used `note` while the backend uses
+    // `notes`. Mirror it before saving so per-contact notes are not lost.
+    contacts.forEach(contact => {
+      if (contact && contact.note && !contact.notes) contact.notes = contact.note;
+    });
+
     const originalLabel = newCampaignButton.innerHTML;
     newCampaignButton.disabled = true;
     newCampaignButton.innerHTML = '<i data-lucide="loader-circle"></i>Saving previous campaign…';
