@@ -1,0 +1,112 @@
+.mapping-panel{
+  margin-top:14px;
+  padding:16px;
+  border-radius:20px;
+  position:relative;
+  z-index:1;
+}
+
+.mapping-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  margin-bottom:13px;
+}
+
+.mapping-head h3{
+  margin:0;
+  font-size:15px;
+  letter-spacing:-.025em;
+}
+
+.mapping-head p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.5;
+}
+
+.mapping-state{
+  flex:none;
+  padding:7px 10px;
+  border-radius:999px;
+  color:#7b879d;
+  background:rgba(255,255,255,.52);
+  border:1px solid rgba(255,255,255,.68);
+  font-size:10px;
+  font-weight:800;
+}
+
+.mapping-state.ready{
+  color:#208e68;
+  background:rgba(234,249,242,.72);
+  border-color:rgba(122,215,177,.45);
+}
+
+.mapping-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+
+.mapping-field{
+  min-width:0;
+}
+
+.mapping-field label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-bottom:7px;
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:#748199;
+}
+
+.mapping-field label svg{
+  width:14px;
+  height:14px;
+}
+
+.mapping-select{
+  width:100%;
+  min-height:44px;
+  padding:0 12px;
+  border-radius:14px;
+  color:var(--text);
+  background:rgba(255,255,255,.54);
+  border:1px solid rgba(255,255,255,.68);
+  outline:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.60);
+  backdrop-filter:blur(18px) saturate(180%);
+  -webkit-backdrop-filter:blur(18px) saturate(180%);
+}
+
+.mapping-select:focus{
+  border-color:rgba(95,128,255,.48);
+  box-shadow:0 0 0 4px rgba(95,128,255,.10), inset 0 1px 0 rgba(255,255,255,.70);
+}
+
+.mapping-select:disabled{
+  opacity:.50;
+  cursor:not-allowed;
+}
+
+.mapping-help{
+  margin-top:10px;
+  color:#8591a7;
+  font-size:10px;
+  line-height:1.5;
+}
+
+.mapping-help strong{
+  color:#65728a;
+}
+
+@media(max-width:780px){
+  .mapping-grid{grid-template-columns:1fr;}
+  .mapping-head{flex-direction:column;}
+}
