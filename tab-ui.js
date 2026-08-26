@@ -31,22 +31,22 @@
     contactsSection: {
       eyebrow: 'Contacts',
       title: 'Review valid contacts',
-      subtitle: 'Inspect the exact contacts that will be written into the VCF export.'
+      subtitle: 'Inspect the contacts for the current or loaded campaign before export.'
     },
     campaignSection: {
       eyebrow: 'Campaign',
-      title: 'Campaign snapshot',
-      subtitle: 'See how your current campaign metadata will identify and organize exported leads.'
+      title: 'Campaign workspace',
+      subtitle: 'Set up a new campaign, review the current campaign, or open a synced campaign from history.'
     },
     backendSection: {
       eyebrow: 'Backend',
       title: 'Google Sheets sync',
-      subtitle: 'Use the permanent managed Apps Script backend to save and reload validated contacts.'
+      subtitle: 'Use the permanent managed Apps Script backend to save and reload campaign-related contacts.'
     },
     settingsSection: {
       eyebrow: 'Settings',
-      title: 'Customize the export',
-      subtitle: 'Choose saved-name formatting, campaign metadata, notes, and download the final VCF.'
+      title: 'Export controls',
+      subtitle: 'Refresh the current preview, download the VCF, or reset the workspace.'
     }
   };
 
@@ -143,7 +143,7 @@
       const meta = [source, category].filter(Boolean);
       overviewCampaignMeta.textContent = meta.length
         ? meta.join(' · ')
-        : 'Add campaign metadata when you want every exported contact tagged consistently.';
+        : 'Set up a campaign to group contacts consistently in history and export.';
     }
   }
 
