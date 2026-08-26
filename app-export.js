@@ -42,8 +42,9 @@ function cleanPhone(phone) {
         .replace(/,/g, "\\,");
     }
 
-    function buildMarketingNote(settings) {
+    function buildMarketingNote(settings, contactNote) {
       const lines = [];
+      if (contactNote) lines.push("Contact Note: " + contactNote);
       if (settings.event) lines.push("Event/Campaign: " + settings.event);
       if (settings.source) lines.push("Lead Source: " + settings.source);
       if (settings.category) lines.push("Category: " + settings.category);
@@ -57,7 +58,7 @@ function cleanPhone(phone) {
       contacts.forEach(contact => {
         if (!contact.fullName || (!contact.phone && !contact.email)) return;
         const savedName = buildContactName(contact.fullName, settings.event, settings.nameFormat);
-        const note = buildMarketingNote(settings);
+        const note = buildMarketingNote(settings, contact.note);
         vcf += "BEGIN:VCARD\r\n";
         vcf += "VERSION:3.0\r\n";
         vcf += "N:;" + escapeVCF(savedName) + ";;;\r\n";
@@ -115,6 +116,7 @@ function cleanPhone(phone) {
         const tr = document.createElement("tr");
         const phoneHTML = contact.phone ? escapeHTML(contact.phone) : '<span class="mini-badge">No phone</span>';
         const emailHTML = contact.email ? escapeHTML(contact.email) : '<span class="mini-badge">No e-mail</span>';
+        const noteHTML = contact.note ? escapeHTML(contact.note) : '<span class="mini-badge">No notes</span>';
         tr.innerHTML = `
           <td>${index + 1}</td>
           <td>
@@ -125,6 +127,7 @@ function cleanPhone(phone) {
           </td>
           <td>${phoneHTML}</td>
           <td>${emailHTML}</td>
+          <td>${noteHTML}</td>
           <td>${settings.event ? escapeHTML(settings.event) : "—"}</td>
           <td>${settings.source ? escapeHTML(settings.source) : "—"}</td>
           <td>${settings.category ? escapeHTML(settings.category) : "—"}</td>
