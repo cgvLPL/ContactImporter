@@ -50,6 +50,7 @@
     .then(() => loadScript('./google-sheets-backend.js'))
     .then(() => loadScript('./tab-ui.js'))
     .then(() => loadScript('./campaign-selector.js'))
+    .then(() => loadScript('./campaign-workspace-state.js'))
     .catch((error) => {
       console.error(error);
       const badge = document.getElementById('statusBadge');
