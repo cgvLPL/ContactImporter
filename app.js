@@ -7,7 +7,7 @@
 
     const brandHome = document.getElementById('brandHome');
     if (brandHome) {
-      brandHome.innerHTML = '<img class="sidebar-logo-mark" src="./assets/logo-mark.svg" alt=""><span class="sidebar-brand-text">ContactImporter</span>';
+      brandHome.innerHTML = '<img class="sidebar-logotype" src="./assets/logo.svg" alt="ContactImporter">';
     }
 
     if (!document.querySelector('link[rel="icon"]')) {
