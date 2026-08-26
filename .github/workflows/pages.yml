@@ -20,6 +20,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,10 +30,49 @@ jobs:
         with:
           enablement: true
 
+      - name: Build static site with update version
+        env:
+          APP_VERSION: ${{ github.sha }}
+        run: |
+          mkdir -p _site
+          rsync -a \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude '_site' \
+            ./ _site/
+
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          site = Path('_site')
+          index = site / 'index.html'
+          version = os.environ['APP_VERSION']
+
+          html = index.read_text(encoding='utf-8')
+
+          meta = f'<meta name="app-version" content="{version}" />'
+          script = '<script src="./update-check.js"></script>'
+
+          if 'name="app-version"' not in html:
+              html = html.replace('</head>', f'  {meta}\n</head>')
+
+          if 'update-check.js' not in html:
+              html = html.replace('</body>', f'  {script}\n</body>')
+
+          index.write_text(html, encoding='utf-8')
+
+          (site / 'version.json').write_text(
+              json.dumps({'version': version}, separators=(',', ':')),
+              encoding='utf-8'
+          )
+          PY
+
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "."
+          path: "_site"
 
       - name: Deploy to GitHub Pages
         id: deployment
