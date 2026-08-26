@@ -1,6 +1,6 @@
 const CONTACT_IMPORTER = Object.freeze({
   name: 'ContactImporter Google Sheets Backend',
-  version: '2026.08.26-v1',
+  version: '2026.08.26-v2-permanent',
   timezone: 'Asia/Jakarta',
   contactsSheet: 'Contacts',
   syncLogSheet: 'SyncLog',
@@ -46,7 +46,6 @@ function doGet(event) {
     const action = String((event && event.parameter && event.parameter.action) || 'health').trim();
     const payload = {
       action: action,
-      accessKey: String((event && event.parameter && event.parameter.accessKey) || ''),
       limit: Number((event && event.parameter && event.parameter.limit) || 1000),
     };
     return json_(dispatch_(payload));
@@ -76,9 +75,9 @@ function dispatch_(body) {
  * Run this once from the Apps Script editor after attaching the script to the
  * Google Sheet that should store ContactImporter data.
  *
- * The function creates the required sheets, stores the spreadsheet ID, and
- * creates an access key if one does not exist. The access key is written to the
- * execution log and returned from the function.
+ * The function creates the required sheets and permanently binds this Apps
+ * Script project to the current spreadsheet. ContactImporter now uses one fixed
+ * production Web App endpoint, so there is no frontend-editable access key.
  */
 function setupContactImporterBackend() {
   const spreadsheet = activeSpreadsheet_();
@@ -92,59 +91,52 @@ function setupContactImporterBackend() {
 
   const properties = PropertiesService.getScriptProperties();
   properties.setProperty('CONTACTIMPORTER_SPREADSHEET_ID', spreadsheet.getId());
-
-  let accessKey = String(properties.getProperty('CONTACTIMPORTER_ACCESS_KEY') || '').trim();
-  if (!accessKey) {
-    accessKey = makeAccessKey_();
-    properties.setProperty('CONTACTIMPORTER_ACCESS_KEY', accessKey);
-  }
+  properties.deleteProperty('CONTACTIMPORTER_ACCESS_KEY');
 
   const result = {
     ok: true,
     service: CONTACT_IMPORTER.name,
     version: CONTACT_IMPORTER.version,
+    mode: 'permanent',
     spreadsheetId: spreadsheet.getId(),
     spreadsheetUrl: spreadsheet.getUrl(),
     contactsSheet: CONTACT_IMPORTER.contactsSheet,
     syncLogSheet: CONTACT_IMPORTER.syncLogSheet,
-    accessKey: accessKey,
   };
 
-  console.log('ContactImporter backend access key: ' + accessKey);
   console.log(JSON.stringify(result));
   return result;
 }
 
-/** Generate a new backend access key and invalidate the old one. */
-function rotateContactImporterAccessKey() {
-  const accessKey = makeAccessKey_();
-  PropertiesService.getScriptProperties().setProperty('CONTACTIMPORTER_ACCESS_KEY', accessKey);
-  console.log('New ContactImporter backend access key: ' + accessKey);
-  return { ok: true, accessKey: accessKey };
+/**
+ * Compatibility helper for installations created before the permanent backend
+ * release. Running it simply removes the legacy access-key property.
+ */
+function removeLegacyContactImporterAccessKey() {
+  PropertiesService.getScriptProperties().deleteProperty('CONTACTIMPORTER_ACCESS_KEY');
+  return { ok: true, mode: 'permanent' };
 }
 
-function health_(body) {
+function health_() {
   const spreadsheet = spreadsheet_();
   const contactsSheet = spreadsheet.getSheetByName(CONTACT_IMPORTER.contactsSheet);
   const syncLogSheet = spreadsheet.getSheetByName(CONTACT_IMPORTER.syncLogSheet);
-  const configuredKey = configuredAccessKey_();
-  const providedKey = String(body.accessKey || '');
 
   return {
     ok: Boolean(contactsSheet && syncLogSheet),
     ready: Boolean(contactsSheet && syncLogSheet),
     service: CONTACT_IMPORTER.name,
     version: CONTACT_IMPORTER.version,
+    mode: 'permanent',
     spreadsheetName: spreadsheet.getName(),
     contactsSheet: CONTACT_IMPORTER.contactsSheet,
-    authRequired: Boolean(configuredKey),
-    authenticated: !configuredKey || secureEquals_(providedKey, configuredKey),
+    authRequired: false,
+    authenticated: true,
     now: new Date().toISOString(),
   };
 }
 
 function listContacts_(body) {
-  requireAccess_(body);
   const sheet = getContactsSheet_();
   const rows = rowsAsObjects_(sheet, CONTACT_HEADERS);
   const requestedLimit = Number(body.limit || 1000);
@@ -179,8 +171,6 @@ function listContacts_(body) {
 }
 
 function upsertContacts_(body) {
-  requireAccess_(body);
-
   const incoming = Array.isArray(body.contacts) ? body.contacts : [];
   if (!incoming.length) throw new Error('No contacts were provided.');
   if (incoming.length > CONTACT_IMPORTER.maxBatchSize) {
@@ -284,19 +274,6 @@ function makeContactKey_(phone, email) {
   const normalizedEmail = String(email || '').trim().toLowerCase();
   if (normalizedEmail) return 'email:' + normalizedEmail;
   return '';
-}
-
-function requireAccess_(body) {
-  const configured = configuredAccessKey_();
-  if (!configured) {
-    throw new Error('Backend access key is not configured. Run setupContactImporterBackend().');
-  }
-  const provided = String(body.accessKey || '');
-  if (!secureEquals_(provided, configured)) throw new Error('Invalid backend access key.');
-}
-
-function configuredAccessKey_() {
-  return String(PropertiesService.getScriptProperties().getProperty('CONTACTIMPORTER_ACCESS_KEY') || '').trim();
 }
 
 function spreadsheet_() {
@@ -422,19 +399,6 @@ function isoCell_(value) {
   if (value instanceof Date && !isNaN(value.getTime())) return value.toISOString();
   const date = new Date(value);
   return isNaN(date.getTime()) ? String(value) : date.toISOString();
-}
-
-function makeAccessKey_() {
-  return (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '');
-}
-
-function secureEquals_(left, right) {
-  const a = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(left || ''), Utilities.Charset.UTF_8);
-  const b = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(right || ''), Utilities.Charset.UTF_8);
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i += 1) diff |= (a[i] ^ b[i]);
-  return diff === 0;
 }
 
 function withMeta_(payload) {
