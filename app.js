@@ -35,6 +35,7 @@
     .then(() => loadScript('./app-export.js'))
     .then(() => loadScript('./app-runtime-fix.js'))
     .then(() => loadScript('./column-mapping.js'))
+    .then(() => loadScript('./google-sheets-backend.js'))
     .then(() => loadScript('./tab-ui.js'))
     .catch((error) => {
       console.error(error);
