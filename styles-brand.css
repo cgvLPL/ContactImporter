@@ -23,83 +23,97 @@
 }
 
 .brand-product-name{
-  display:block;
+  display:inline-flex;
+  align-items:baseline;
+  min-width:0;
   color:var(--brand-white,#f8f8f6);
   font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-  font-weight:500;
-  letter-spacing:-.035em;
+  letter-spacing:-.045em;
   line-height:1;
 }
 
+.brand-product-name span{
+  font-weight:300;
+}
+
+.brand-product-name strong{
+  font-weight:700;
+}
+
 .brand-lockup-header{
-  gap:15px;
+  gap:14px;
 }
 
 .brand-lockup-header .brand-cgv-logo{
-  height:38px;
+  height:40px;
 }
 
 .brand-lockup-header .brand-lockup-divider{
-  height:38px;
+  height:52px;
 }
 
 .brand-lockup-header .brand-product-name{
-  font-size:25px;
+  font-size:23px;
 }
 
 .brand-lockup-sidebar{
   width:100%;
-  gap:12px;
+  gap:9px;
 }
 
 .brand-lockup-sidebar .brand-cgv-logo{
-  height:31px;
+  height:27px;
 }
 
 .brand-lockup-sidebar .brand-lockup-divider{
-  height:31px;
+  width:1.5px;
+  height:38px;
 }
 
 .brand-lockup-sidebar .brand-product-name{
   min-width:0;
   overflow:hidden;
-  text-overflow:ellipsis;
-  font-size:17px;
-  font-weight:600;
+  font-size:14.5px;
 }
 
 .brand-home{
   justify-content:flex-start !important;
+  padding:9px 4px 18px !important;
 }
 
 @media (max-width:860px){
   .brand-lockup-header{
-    gap:11px;
+    gap:10px;
   }
 
   .brand-lockup-header .brand-cgv-logo{
-    height:30px;
+    height:32px;
   }
 
   .brand-lockup-header .brand-lockup-divider{
-    height:30px;
+    height:42px;
   }
 
   .brand-lockup-header .brand-product-name{
-    font-size:20px;
+    font-size:18.5px;
   }
 }
 
 @media (max-width:420px){
+  .brand-lockup-header{
+    gap:8px;
+  }
+
   .brand-lockup-header .brand-cgv-logo{
-    height:26px;
+    height:28px;
   }
 
   .brand-lockup-header .brand-lockup-divider{
-    height:26px;
+    width:1.5px;
+    height:36px;
   }
 
   .brand-lockup-header .brand-product-name{
-    font-size:17px;
+    font-size:16px;
   }
 }
