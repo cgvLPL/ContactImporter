@@ -5,7 +5,7 @@
     <span class="brand-lockup brand-lockup-${variant}" aria-label="CGV | ContactImporter">
       <img class="brand-cgv-logo" src="${CGV_LOGO_URL}" alt="CGV" decoding="async">
       <span class="brand-lockup-divider" aria-hidden="true"></span>
-      <span class="brand-product-name">ContactImporter</span>
+      <span class="brand-product-name"><span>Contact</span><strong>Importer</strong></span>
     </span>
   `;
 
