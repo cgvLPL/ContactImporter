@@ -1,0 +1,82 @@
+/* Campaign setup now lives inside the Campaign tab. */
+
+.campaign-settings-card{
+  padding:24px;
+  min-width:0;
+}
+
+.campaign-settings-card .settings-heading{
+  margin-bottom:18px;
+}
+
+.campaign-settings-card .settings-heading h2{
+  margin:3px 0 7px;
+  color:var(--brand-white,#f8f8f6);
+  font-size:25px;
+  letter-spacing:-.04em;
+}
+
+.campaign-settings-card .settings-heading p{
+  max-width:680px;
+  margin:0;
+  color:var(--brand-muted,#a4aaa6);
+  font-size:11px;
+  line-height:1.65;
+}
+
+.campaign-settings-card .form-grid{
+  position:relative;
+  z-index:1;
+}
+
+.campaign-settings-card .field label{
+  color:var(--brand-muted,#a4aaa6);
+}
+
+.campaign-setup-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin-top:18px !important;
+  position:relative;
+  z-index:1;
+}
+
+.settings-feature-list{
+  position:relative;
+  z-index:1;
+  margin:2px 0 22px;
+}
+
+.settings-feature-list>div{
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018)),
+    rgba(8,10,11,.55) !important;
+  border-color:rgba(255,255,255,.10) !important;
+}
+
+.settings-feature-list svg{
+  color:var(--brand-coral,#ff8b46) !important;
+}
+
+@media(max-width:1120px){
+  .campaign-settings-card{
+    min-height:auto;
+  }
+}
+
+@media(max-width:560px){
+  .campaign-settings-card{
+    padding:17px !important;
+  }
+
+  .campaign-setup-actions{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .campaign-setup-actions .glass-btn{
+    width:100%;
+    justify-content:center;
+  }
+}
