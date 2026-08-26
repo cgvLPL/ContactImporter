@@ -106,7 +106,7 @@
               <div>
                 <div class="section-kicker">Start here</div>
                 <h2>Import a spreadsheet</h2>
-                <p>Upload XLSX, XLS, or CSV, then map any spreadsheet columns to Name, Phone Number, and E-mail.</p>
+                <p>Upload XLSX, XLS, or CSV, then map any spreadsheet columns to Name, Phone Number, E-mail, and optional Notes.</p>
                 <button type="button" class="glass-btn primary" data-open-tab="importSection">
                   <i data-lucide="arrow-right"></i>
                   Open Import
@@ -121,7 +121,7 @@
                 <h2>Four simple steps</h2>
                 <ol class="workflow-list">
                   <li><span>1</span><div><strong>Import</strong><small>Choose your spreadsheet.</small></div></li>
-                  <li><span>2</span><div><strong>Map</strong><small>Select name, phone, and e-mail columns.</small></div></li>
+                  <li><span>2</span><div><strong>Map</strong><small>Select name, phone, e-mail, and notes columns.</small></div></li>
                   <li><span>3</span><div><strong>Review</strong><small>Check the valid contact preview.</small></div></li>
                   <li><span>4</span><div><strong>Export</strong><small>Download one bulk VCF file.</small></div></li>
                 </ol>
@@ -150,7 +150,7 @@
                 <div class="iconbox"><i data-lucide="file-up"></i></div>
                 <div>
                   <h2>Import spreadsheet</h2>
-                  <p>Row 1 is treated as the header. Upload first, then map your spreadsheet columns.</p>
+                  <p>Row 1 is treated as the header. Upload first, then map Name, Phone, E-mail, and optional Notes.</p>
                 </div>
               </div>
               <div class="mini-badge">.xlsx · .xls · .csv</div>
@@ -184,7 +184,7 @@
             <div class="rule glass">
               <i data-lucide="badge-check"></i>
               <div>
-                <strong>Export rule:</strong> a contact is included only when it has a <strong>Full Name</strong> and at least one contact method: <strong>Phone Number or E-mail</strong>.
+                <strong>Export rule:</strong> a contact is included only when it has a <strong>Full Name</strong> and at least one contact method: <strong>Phone Number or E-mail</strong>. Notes are optional and are preserved in the contact's VCF note.
               </div>
             </div>
           </div>
@@ -212,6 +212,7 @@
                     <th>Saved Name</th>
                     <th>Phone</th>
                     <th>E-mail</th>
+                    <th>Notes</th>
                     <th>Event</th>
                     <th>Source</th>
                     <th>Category</th>
@@ -226,7 +227,7 @@
             </div>
 
             <div class="contacts-footer">
-              <span>Names are normalized for consistent Indonesian-style capitalization.</span>
+              <span>Names are normalized and mapped spreadsheet notes are preserved per contact.</span>
               <button type="button" class="glass-btn primary" data-open-tab="settingsSection"><i data-lucide="arrow-right"></i>Prepare export</button>
             </div>
           </div>
@@ -246,11 +247,11 @@
             <div class="campaign-info glass">
               <div class="section-kicker">How metadata is used</div>
               <h2>Keep every lead organized.</h2>
-              <p>Campaign information is applied consistently to the exported contacts. You can include the campaign in the saved contact name, add a category, source, and follow-up note.</p>
+              <p>Campaign information is applied consistently to the exported contacts. Spreadsheet notes stay specific to each contact, while campaign metadata can be applied to the whole batch.</p>
               <div class="campaign-feature-list">
                 <div><i data-lucide="contact"></i><span><strong>Saved name format</strong><small>Choose whether the campaign appears before or after the name.</small></span></div>
                 <div><i data-lucide="tags"></i><span><strong>Category</strong><small>Stored as a VCF category where supported.</small></span></div>
-                <div><i data-lucide="notebook-pen"></i><span><strong>Marketing notes</strong><small>Event, source, category, and your additional note are preserved.</small></span></div>
+                <div><i data-lucide="notebook-pen"></i><span><strong>Contact + marketing notes</strong><small>Mapped contact notes and batch-level additional notes are combined safely in the VCF NOTE field.</small></span></div>
               </div>
               <button type="button" class="glass-btn primary" data-open-tab="settingsSection"><i data-lucide="sliders-horizontal"></i>Edit campaign settings</button>
             </div>
@@ -264,7 +265,7 @@
                 <div>
                   <div class="section-kicker">Campaign metadata</div>
                   <h2>Customize exported contacts</h2>
-                  <p>These values apply to every valid contact in the current import.</p>
+                  <p>These values apply to every valid contact in the current import. Spreadsheet-mapped Notes remain contact-specific.</p>
                 </div>
                 <div class="settings-icon"><i data-lucide="sliders-horizontal"></i></div>
               </div>
@@ -297,7 +298,7 @@
 
                 <div class="field full">
                   <label for="additionalNote">Additional Note</label>
-                  <textarea id="additionalNote" placeholder="Met at booth A12. Interested in follow-up."></textarea>
+                  <textarea id="additionalNote" placeholder="This batch-level note is added to every exported contact."></textarea>
                 </div>
               </div>
 
@@ -326,7 +327,7 @@
               <p>Import a spreadsheet and validate at least one contact to enable the VCF download button.</p>
               <div class="export-rule-line"><i data-lucide="check"></i>Name is required</div>
               <div class="export-rule-line"><i data-lucide="check"></i>Phone or e-mail is required</div>
-              <div class="export-rule-line"><i data-lucide="check"></i>Campaign metadata is optional</div>
+              <div class="export-rule-line"><i data-lucide="check"></i>Notes and campaign metadata are optional</div>
             </aside>
           </div>
         </section>
