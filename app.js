@@ -33,6 +33,8 @@
 
   loadScript('./app-core.js')
     .then(() => loadScript('./app-export.js'))
+    .then(() => loadScript('./app-runtime-fix.js'))
+    .then(() => loadScript('./column-mapping.js'))
     .catch((error) => {
       console.error(error);
       const badge = document.getElementById('statusBadge');
