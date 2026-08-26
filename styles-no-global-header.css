@@ -6,11 +6,63 @@
 .shell{
   margin-top:16px !important;
   min-height:calc(100vh - 32px) !important;
+  grid-template-columns:290px minmax(0,1fr) !important;
+}
+
+/* Keep the full CGV | ContactImporter lockup visible in the desktop sidebar. */
+.brand-home{
+  overflow:visible !important;
+  padding-left:6px !important;
+  padding-right:6px !important;
+}
+
+.brand-lockup-sidebar{
+  width:100% !important;
+  max-width:none !important;
+  gap:10px !important;
+  overflow:visible !important;
+}
+
+.brand-lockup-sidebar .brand-cgv-logo{
+  height:32px !important;
+}
+
+.brand-lockup-sidebar .brand-lockup-divider{
+  width:2px !important;
+  height:44px !important;
+}
+
+.brand-lockup-sidebar .brand-product-name{
+  flex:none !important;
+  min-width:max-content !important;
+  overflow:visible !important;
+  white-space:nowrap !important;
+  font-size:16px !important;
+  letter-spacing:-.045em !important;
+}
+
+@media(max-width:1080px) and (min-width:861px){
+  .shell{
+    grid-template-columns:270px minmax(0,1fr) !important;
+  }
+
+  .brand-lockup-sidebar .brand-cgv-logo{
+    height:29px !important;
+  }
+
+  .brand-lockup-sidebar .brand-lockup-divider{
+    height:40px !important;
+  }
+
+  .brand-lockup-sidebar .brand-product-name{
+    font-size:15px !important;
+  }
 }
 
 @media(max-width:860px){
   .shell{
     margin-top:10px !important;
     min-height:calc(100vh - 20px) !important;
+    grid-template-columns:1fr !important;
   }
 }
