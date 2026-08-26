@@ -1,0 +1,30 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ContactImporter logo mark</title>
+  <desc id="desc">Purple liquid-glass contact card icon.</desc>
+  <defs>
+    <linearGradient id="g" x1="18" y1="18" x2="142" y2="142" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6E8CFF"/>
+      <stop offset="0.52" stop-color="#8578FF"/>
+      <stop offset="1" stop-color="#A16EFF"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="28" y1="20" x2="115" y2="132" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity="0.72"/>
+      <stop offset="0.35" stop-color="white" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#627BFF" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <rect x="12" y="12" width="136" height="136" rx="38" fill="url(#g)"/>
+    <rect x="13.5" y="13.5" width="133" height="133" rx="36.5" stroke="white" stroke-opacity="0.42" stroke-width="3"/>
+    <path d="M28 38C44 23 67 19 91 23C116 27 132 44 138 62C121 49 104 43 84 42C62 41 44 47 28 58V38Z" fill="url(#shine)"/>
+  </g>
+  <g stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="45" y="45" width="70" height="75" rx="10"/>
+    <path d="M60 45V36M100 45V36"/>
+    <circle cx="80" cy="72" r="14"/>
+    <path d="M57 108C60 94 68 87 80 87C92 87 100 94 103 108"/>
+  </g>
+</svg>
