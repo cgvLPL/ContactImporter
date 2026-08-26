@@ -15,35 +15,39 @@
   <div class="orb two"></div>
   <div class="orb three"></div>
 
-  <div class="mobile-bar">
+  <header class="mobile-bar" aria-label="ContactImporter header">
     <div class="mobile-brand" aria-label="ContactImporter">
       <div class="brand-badge" style="width:30px;height:30px;border-radius:11px;"><i data-lucide="contact-round"></i></div>
       <span class="mobile-brand-text">ContactImporter</span>
     </div>
-  </div>
+    <div class="header-status">
+      <span class="header-status-dot"></span>
+      Browser-only processing
+    </div>
+  </header>
 
   <div class="shell">
-    <aside class="sidebar">
-      <button type="button" class="brand brand-home" id="brandHome" aria-label="Go to overview">
+    <aside class="sidebar" aria-label="Workspace tabs">
+      <button type="button" class="brand brand-home" id="brandHome" aria-label="Open overview">
         <div class="brand-badge"><i data-lucide="contact-round"></i></div>
-        ContactFlow
+        ContactImporter
       </button>
 
       <div class="sidebar-section-title">Workspace</div>
-      <nav class="nav" aria-label="Workspace navigation">
-        <button type="button" class="nav-item nav-button active" data-target="overviewSection">
+      <nav class="nav" role="tablist" aria-label="ContactImporter sections">
+        <button type="button" class="nav-item nav-button active" data-target="overviewSection" role="tab" aria-controls="overviewSection" aria-selected="true">
           <i data-lucide="layout-dashboard"></i><span>Overview</span>
         </button>
-        <button type="button" class="nav-item nav-button" data-target="contactsSection">
-          <i data-lucide="users-round"></i><span>Contacts</span>
-        </button>
-        <button type="button" class="nav-item nav-button" data-target="campaignSection">
-          <i data-lucide="megaphone"></i><span>Campaign</span>
-        </button>
-        <button type="button" class="nav-item nav-button" data-target="importSection">
+        <button type="button" class="nav-item nav-button" data-target="importSection" role="tab" aria-controls="importSection" aria-selected="false">
           <i data-lucide="file-spreadsheet"></i><span>Import</span>
         </button>
-        <button type="button" class="nav-item nav-button" data-target="settingsSection">
+        <button type="button" class="nav-item nav-button" data-target="contactsSection" role="tab" aria-controls="contactsSection" aria-selected="false">
+          <i data-lucide="users-round"></i><span>Contacts</span>
+        </button>
+        <button type="button" class="nav-item nav-button" data-target="campaignSection" role="tab" aria-controls="campaignSection" aria-selected="false">
+          <i data-lucide="megaphone"></i><span>Campaign</span>
+        </button>
+        <button type="button" class="nav-item nav-button" data-target="settingsSection" role="tab" aria-controls="settingsSection" aria-selected="false">
           <i data-lucide="settings-2"></i><span>Settings</span>
         </button>
       </nav>
@@ -51,192 +55,282 @@
       <div class="sidebar-card glass">
         <div class="icon"><i data-lucide="shield-check"></i></div>
         <h4>Private by design</h4>
-        <p>Your spreadsheet is processed entirely in your browser. This page does not upload your contacts anywhere.</p>
+        <p>Your spreadsheet stays in this browser. ContactImporter does not upload the contact file to a server.</p>
       </div>
     </aside>
 
     <main class="content">
-      <div class="topbar topbar-compact" id="overviewSection">
+      <div class="topbar workspace-topbar">
+        <div class="workspace-heading">
+          <div class="workspace-kicker" id="tabEyebrow">Overview</div>
+          <h1 class="workspace-title" id="tabTitle">Contact workspace</h1>
+          <p class="workspace-subtitle" id="tabSubtitle">Import, review, enrich, and export contacts without leaving the browser.</p>
+        </div>
         <div class="top-pills">
           <div class="pill glass glow">Local processing</div>
-          <div class="pill glass">C = Name · D = Phone · E = E-mail</div>
+          <div class="pill glass">Custom column mapping</div>
         </div>
       </div>
 
-      <section class="stats-grid">
-        <div class="stat-card glass accent-blue">
-          <div class="top">Ready Contacts <div class="stat-icon"><i data-lucide="users"></i></div></div>
-          <div class="stat-value" id="validCount">0</div>
-          <div class="stat-note">Eligible for VCF export</div>
-        </div>
+      <div class="tab-stage">
+        <section class="tab-panel active" id="overviewSection" role="tabpanel" aria-label="Overview">
+          <div class="stats-grid">
+            <div class="stat-card glass accent-blue">
+              <div class="top">Ready Contacts <div class="stat-icon"><i data-lucide="users"></i></div></div>
+              <div class="stat-value" id="validCount">0</div>
+              <div class="stat-note">Eligible for VCF export</div>
+            </div>
 
-        <div class="stat-card glass accent-green">
-          <div class="top">With Phone <div class="stat-icon"><i data-lucide="phone"></i></div></div>
-          <div class="stat-value" id="phoneCount">0</div>
-          <div class="stat-note">Valid contacts with phone</div>
-        </div>
+            <div class="stat-card glass accent-green">
+              <div class="top">With Phone <div class="stat-icon"><i data-lucide="phone"></i></div></div>
+              <div class="stat-value" id="phoneCount">0</div>
+              <div class="stat-note">Valid contacts with phone</div>
+            </div>
 
-        <div class="stat-card glass accent-orange">
-          <div class="top">With E-mail <div class="stat-icon"><i data-lucide="mail"></i></div></div>
-          <div class="stat-value" id="emailCount">0</div>
-          <div class="stat-note">Valid contacts with e-mail</div>
-        </div>
+            <div class="stat-card glass accent-orange">
+              <div class="top">With E-mail <div class="stat-icon"><i data-lucide="mail"></i></div></div>
+              <div class="stat-value" id="emailCount">0</div>
+              <div class="stat-note">Valid contacts with e-mail</div>
+            </div>
 
-        <div class="stat-card glass accent-pink">
-          <div class="top">Skipped <div class="stat-icon"><i data-lucide="circle-slash-2"></i></div></div>
-          <div class="stat-value" id="skippedCount">0</div>
-          <div class="stat-note">Rows not meeting the rule</div>
-        </div>
-      </section>
+            <div class="stat-card glass accent-pink">
+              <div class="top">Skipped <div class="stat-icon"><i data-lucide="circle-slash-2"></i></div></div>
+              <div class="stat-value" id="skippedCount">0</div>
+              <div class="stat-note">Rows that do not meet the rule</div>
+            </div>
+          </div>
 
-      <section class="dashboard">
-        <div class="panel glass" id="importSection">
-          <div class="panel-head">
-            <div class="panel-title">
-              <div class="iconbox"><i data-lucide="file-up"></i></div>
+          <div class="overview-grid">
+            <article class="overview-card glass overview-primary">
+              <div class="overview-icon"><i data-lucide="file-up"></i></div>
               <div>
-                <h2>Import spreadsheet</h2>
-                <p>Row 1 is treated as the header. Name capitalization is normalized automatically.</p>
-              </div>
-            </div>
-            <div class="mini-badge">.xlsx · .xls · .csv</div>
-          </div>
-
-          <div class="upload-zone" id="uploadZone" aria-label="Upload spreadsheet">
-            <div class="upload-shine"></div>
-            <div class="upload-content">
-              <div class="upload-icon"><i data-lucide="cloud-upload"></i></div>
-              <h3>Drop your contact file here</h3>
-              <p>Only rows with a <strong>name</strong> and at least one contact method <strong>(phone or e-mail)</strong> will be saved into the final VCF.</p>
-
-              <div class="upload-actions">
-                <button class="glass-btn primary" id="browseBtn" type="button">
-                  <i data-lucide="folder-open"></i>
-                  Browse File
-                </button>
-
-                <button class="glass-btn" id="demoBtn" type="button">
-                  <i data-lucide="sparkles"></i>
-                  Load Demo Data
+                <div class="section-kicker">Start here</div>
+                <h2>Import a spreadsheet</h2>
+                <p>Upload XLSX, XLS, or CSV, then map any spreadsheet columns to Name, Phone Number, and E-mail.</p>
+                <button type="button" class="glass-btn primary" data-open-tab="importSection">
+                  <i data-lucide="arrow-right"></i>
+                  Open Import
                 </button>
               </div>
+            </article>
 
-              <div class="file-chip" id="fileChip"></div>
+            <article class="overview-card glass">
+              <div class="overview-icon secondary"><i data-lucide="list-checks"></i></div>
+              <div>
+                <div class="section-kicker">Workflow</div>
+                <h2>Four simple steps</h2>
+                <ol class="workflow-list">
+                  <li><span>1</span><div><strong>Import</strong><small>Choose your spreadsheet.</small></div></li>
+                  <li><span>2</span><div><strong>Map</strong><small>Select name, phone, and e-mail columns.</small></div></li>
+                  <li><span>3</span><div><strong>Review</strong><small>Check the valid contact preview.</small></div></li>
+                  <li><span>4</span><div><strong>Export</strong><small>Download one bulk VCF file.</small></div></li>
+                </ol>
+              </div>
+            </article>
+
+            <article class="overview-card glass campaign-summary-card">
+              <div class="overview-icon tertiary"><i data-lucide="megaphone"></i></div>
+              <div>
+                <div class="section-kicker">Campaign</div>
+                <h2 id="overviewCampaignName">Untitled campaign</h2>
+                <p id="overviewCampaignMeta">Add campaign metadata when you want every exported contact tagged consistently.</p>
+                <button type="button" class="glass-btn" data-open-tab="settingsSection">
+                  <i data-lucide="sliders-horizontal"></i>
+                  Edit metadata
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="importSection" role="tabpanel" aria-label="Import" hidden>
+          <div class="panel glass import-panel">
+            <div class="panel-head">
+              <div class="panel-title">
+                <div class="iconbox"><i data-lucide="file-up"></i></div>
+                <div>
+                  <h2>Import spreadsheet</h2>
+                  <p>Row 1 is treated as the header. Upload first, then map your spreadsheet columns.</p>
+                </div>
+              </div>
+              <div class="mini-badge">.xlsx · .xls · .csv</div>
             </div>
 
-            <input id="excelFile" type="file" accept=".xlsx,.xls,.csv" hidden />
-          </div>
+            <div class="upload-zone" id="uploadZone" aria-label="Upload spreadsheet">
+              <div class="upload-shine"></div>
+              <div class="upload-content">
+                <div class="upload-icon"><i data-lucide="cloud-upload"></i></div>
+                <h3>Drop your contact file here</h3>
+                <p>Choose a spreadsheet from your device. Nothing is uploaded to a remote server.</p>
 
-          <div class="rule glass">
-            <i data-lucide="badge-check"></i>
-            <div>
-              <strong>Export rule:</strong> include a row only if it has
-              <strong>Full Name</strong> and at least one of
-              <strong>Phone Number</strong> or <strong>E-mail</strong>.
-            </div>
-          </div>
-        </div>
+                <div class="upload-actions">
+                  <button class="glass-btn primary" id="browseBtn" type="button">
+                    <i data-lucide="folder-open"></i>
+                    Browse File
+                  </button>
 
-        <div class="right-stack">
-          <div class="campaign-card" id="campaignSection">
-            <div class="campaign-kicker">Current campaign</div>
-            <div class="campaign-title" id="heroEvent">Untitled campaign</div>
-            <div class="campaign-meta">
-              <div class="campaign-chip" id="heroSource">No source</div>
-              <div class="campaign-chip" id="heroCategory">No category</div>
-            </div>
-          </div>
+                  <button class="glass-btn" id="demoBtn" type="button">
+                    <i data-lucide="sparkles"></i>
+                    Load Demo Data
+                  </button>
+                </div>
 
-          <div class="settings-card glass" id="settingsSection">
-            <div class="section-kicker">Campaign metadata</div>
-
-            <div class="form-grid">
-              <div class="field full">
-                <label for="eventName">Event / Campaign Name</label>
-                <input class="input" id="eventName" type="text" placeholder="Jakarta Expo 2026" />
+                <div class="file-chip" id="fileChip"></div>
               </div>
 
-              <div class="field full">
-                <label for="nameFormat">Saved Contact Name</label>
-                <select id="nameFormat">
-                  <option value="name">Full Name</option>
-                  <option value="event-name">Event — Full Name</option>
-                  <option value="name-event">Full Name — Event</option>
-                  <option value="event-bracket">Full Name [Event]</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="source">Lead Source</label>
-                <input class="input" id="source" type="text" placeholder="Exhibition booth" />
-              </div>
-
-              <div class="field">
-                <label for="category">Category</label>
-                <input class="input" id="category" type="text" placeholder="Hot lead" />
-              </div>
-
-              <div class="field full">
-                <label for="additionalNote">Additional Note</label>
-                <textarea id="additionalNote" placeholder="Met at booth A12. Interested in follow-up."></textarea>
-              </div>
+              <input id="excelFile" type="file" accept=".xlsx,.xls,.csv" hidden />
             </div>
 
-            <div class="settings-actions">
-              <button class="glass-btn primary" id="downloadBtn" type="button" disabled>
-                <i data-lucide="download"></i>
-                Download VCF
-              </button>
-
-              <button class="glass-btn" id="refreshBtn" type="button">
-                <i data-lucide="refresh-cw"></i>
-                Refresh Preview
-              </button>
-
-              <button class="glass-btn danger" id="resetBtn" type="button">
-                <i data-lucide="rotate-ccw"></i>
-                Reset
-              </button>
+            <div class="rule glass">
+              <i data-lucide="badge-check"></i>
+              <div>
+                <strong>Export rule:</strong> a contact is included only when it has a <strong>Full Name</strong> and at least one contact method: <strong>Phone Number or E-mail</strong>.
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="preview-section" id="contactsSection">
-        <div class="preview-card glass">
-          <div class="toolbar">
-            <div>
-              <h2>Contact preview</h2>
-              <p>Only contacts that will actually be written into the VCF are listed here.</p>
+        <section class="tab-panel" id="contactsSection" role="tabpanel" aria-label="Contacts" hidden>
+          <div class="preview-card glass contacts-card">
+            <div class="toolbar">
+              <div>
+                <div class="section-kicker">Validated rows</div>
+                <h2>Contact preview</h2>
+                <p>Only contacts that will actually be written into the final VCF are shown.</p>
+              </div>
+              <div class="contacts-toolbar-actions">
+                <div class="status" id="statusBadge" aria-live="polite">Waiting for file</div>
+                <button type="button" class="glass-btn" data-open-tab="importSection"><i data-lucide="file-up"></i>Import another file</button>
+              </div>
             </div>
 
-            <div class="status" id="statusBadge">Waiting for file</div>
-          </div>
+            <div class="table-wrap">
+              <table id="previewTable" style="display:none;">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Saved Name</th>
+                    <th>Phone</th>
+                    <th>E-mail</th>
+                    <th>Event</th>
+                    <th>Source</th>
+                    <th>Category</th>
+                  </tr>
+                </thead>
+                <tbody id="previewBody"></tbody>
+              </table>
 
-          <div class="table-wrap">
-            <table id="previewTable" style="display:none;">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Saved Name</th>
-                  <th>Phone</th>
-                  <th>E-mail</th>
-                  <th>Event</th>
-                  <th>Source</th>
-                  <th>Category</th>
-                </tr>
-              </thead>
-              <tbody id="previewBody"></tbody>
-            </table>
+              <div class="empty-state" id="emptyState">
+                Import a spreadsheet first. Valid contacts will appear here automatically.
+              </div>
+            </div>
 
-            <div class="empty-state" id="emptyState">
-              Upload a spreadsheet, drag & drop a file, or click <strong>Load Demo Data</strong> to preview the interface.
+            <div class="contacts-footer">
+              <span>Names are normalized for consistent Indonesian-style capitalization.</span>
+              <button type="button" class="glass-btn primary" data-open-tab="settingsSection"><i data-lucide="arrow-right"></i>Prepare export</button>
             </div>
           </div>
+        </section>
 
-          <div class="footer-note">Buttons verified in the page logic: Browse File, Load Demo Data, Download VCF, Refresh Preview, and Reset.</div>
-        </div>
-      </section>
+        <section class="tab-panel" id="campaignSection" role="tabpanel" aria-label="Campaign" hidden>
+          <div class="campaign-layout">
+            <div class="campaign-card">
+              <div class="campaign-kicker">Current campaign</div>
+              <div class="campaign-title" id="heroEvent">Untitled campaign</div>
+              <div class="campaign-meta">
+                <div class="campaign-chip" id="heroSource">No source</div>
+                <div class="campaign-chip" id="heroCategory">No category</div>
+              </div>
+            </div>
+
+            <div class="campaign-info glass">
+              <div class="section-kicker">How metadata is used</div>
+              <h2>Keep every lead organized.</h2>
+              <p>Campaign information is applied consistently to the exported contacts. You can include the campaign in the saved contact name, add a category, source, and follow-up note.</p>
+              <div class="campaign-feature-list">
+                <div><i data-lucide="contact"></i><span><strong>Saved name format</strong><small>Choose whether the campaign appears before or after the name.</small></span></div>
+                <div><i data-lucide="tags"></i><span><strong>Category</strong><small>Stored as a VCF category where supported.</small></span></div>
+                <div><i data-lucide="notebook-pen"></i><span><strong>Marketing notes</strong><small>Event, source, category, and your additional note are preserved.</small></span></div>
+              </div>
+              <button type="button" class="glass-btn primary" data-open-tab="settingsSection"><i data-lucide="sliders-horizontal"></i>Edit campaign settings</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="settingsSection" role="tabpanel" aria-label="Settings" hidden>
+          <div class="settings-layout">
+            <div class="settings-card glass">
+              <div class="settings-heading">
+                <div>
+                  <div class="section-kicker">Campaign metadata</div>
+                  <h2>Customize exported contacts</h2>
+                  <p>These values apply to every valid contact in the current import.</p>
+                </div>
+                <div class="settings-icon"><i data-lucide="sliders-horizontal"></i></div>
+              </div>
+
+              <div class="form-grid">
+                <div class="field full">
+                  <label for="eventName">Event / Campaign Name</label>
+                  <input class="input" id="eventName" type="text" placeholder="Jakarta Expo 2026" />
+                </div>
+
+                <div class="field full">
+                  <label for="nameFormat">Saved Contact Name</label>
+                  <select id="nameFormat">
+                    <option value="name">Full Name</option>
+                    <option value="event-name">Event — Full Name</option>
+                    <option value="name-event">Full Name — Event</option>
+                    <option value="event-bracket">Full Name [Event]</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="source">Lead Source</label>
+                  <input class="input" id="source" type="text" placeholder="Exhibition booth" />
+                </div>
+
+                <div class="field">
+                  <label for="category">Category</label>
+                  <input class="input" id="category" type="text" placeholder="Hot lead" />
+                </div>
+
+                <div class="field full">
+                  <label for="additionalNote">Additional Note</label>
+                  <textarea id="additionalNote" placeholder="Met at booth A12. Interested in follow-up."></textarea>
+                </div>
+              </div>
+
+              <div class="settings-actions">
+                <button class="glass-btn primary" id="downloadBtn" type="button" disabled>
+                  <i data-lucide="download"></i>
+                  Download VCF
+                </button>
+
+                <button class="glass-btn" id="refreshBtn" type="button">
+                  <i data-lucide="refresh-cw"></i>
+                  Refresh Preview
+                </button>
+
+                <button class="glass-btn danger" id="resetBtn" type="button">
+                  <i data-lucide="rotate-ccw"></i>
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <aside class="export-summary glass">
+              <div class="section-kicker">Export readiness</div>
+              <div class="export-ready-icon"><i data-lucide="contact-round"></i></div>
+              <h3>Bulk VCF export</h3>
+              <p>Import a spreadsheet and validate at least one contact to enable the VCF download button.</p>
+              <div class="export-rule-line"><i data-lucide="check"></i>Name is required</div>
+              <div class="export-rule-line"><i data-lucide="check"></i>Phone or e-mail is required</div>
+              <div class="export-rule-line"><i data-lucide="check"></i>Campaign metadata is optional</div>
+            </aside>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 
