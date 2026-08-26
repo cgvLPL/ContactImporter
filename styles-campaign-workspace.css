@@ -42,6 +42,54 @@
   z-index:1;
 }
 
+.campaign-new-btn{
+  color:#ffd4b7 !important;
+  border-color:rgba(255,139,70,.26) !important;
+  background:
+    linear-gradient(145deg,rgba(255,177,31,.10),rgba(230,50,47,.045)),
+    rgba(255,255,255,.035) !important;
+}
+
+.campaign-new-btn:hover:not(:disabled){
+  color:#fff !important;
+  border-color:rgba(255,139,70,.40) !important;
+  background:
+    linear-gradient(110deg,rgba(255,177,31,.20),rgba(255,106,34,.16) 55%,rgba(230,50,47,.11)),
+    rgba(255,255,255,.045) !important;
+}
+
+.campaign-new-btn.busy svg{
+  animation:campaignNewSpin .9s linear infinite;
+}
+
+@keyframes campaignNewSpin{
+  to{transform:rotate(360deg)}
+}
+
+.campaign-new-note{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  margin-top:11px;
+  padding:11px 12px;
+  position:relative;
+  z-index:1;
+  border-radius:13px;
+  color:var(--brand-muted,#a4aaa6);
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.08);
+  font-size:9px;
+  line-height:1.55;
+}
+
+.campaign-new-note svg{
+  width:15px;
+  height:15px;
+  flex:none;
+  margin-top:1px;
+  color:var(--brand-coral,#ff8b46);
+}
+
 .settings-feature-list{
   position:relative;
   z-index:1;
@@ -79,4 +127,8 @@
     width:100%;
     justify-content:center;
   }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .campaign-new-btn.busy svg{animation:none}
 }
