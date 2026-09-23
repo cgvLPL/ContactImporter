@@ -229,22 +229,28 @@ function readSpreadsheetFile(file) {
         throw new Error("Spreadsheet has no worksheets");
       }
 
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = window.XLSX.utils.sheet_to_json(firstSheet, {
-        header: 1,
-        raw: false,
-        defval: ""
-      });
-
-      if (!rows.length) {
-        throw new Error("Spreadsheet is empty");
+      // Prefer the worksheet with recognizable contact headers. Registration
+      // exports can have an event title above their actual header row.
+      let selectedSheetLabel = '';
+      if (window.ContactImporterMapping &&
+          typeof window.ContactImporterMapping.loadWorkbook === 'function' &&
+          window.ContactImporterMapping.loadWorkbook(workbook)) {
+        const sheetPicker = document.getElementById('mapSheet');
+        selectedSheetLabel = sheetPicker ? sheetPicker.value : '';
+      } else {
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = window.XLSX.utils.sheet_to_json(firstSheet, {
+          header: 1,
+          raw: false,
+          defval: ''
+        });
+        if (!rows.length) throw new Error('Spreadsheet is empty');
+        parseRows(rows);
       }
-
-      parseRows(rows);
 
       if (fileChip) {
         fileChip.style.display = "block";
-        fileChip.textContent = file.name;
+        fileChip.textContent = file.name + (selectedSheetLabel ? ' · ' + selectedSheetLabel : '');
       }
 
       if (typeof updateStats === "function") updateStats();

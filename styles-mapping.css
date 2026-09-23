@@ -114,3 +114,23 @@
   .mapping-grid{grid-template-columns:1fr;}
   .mapping-head{flex-direction:column;}
 }
+
+/* Worksheet/header controls for Google Forms and titled event registrations. */
+.mapping-source{
+  display:grid;
+  grid-template-columns:minmax(180px,1fr) minmax(180px,1fr);
+  gap:10px;
+  align-items:end;
+  margin:0 0 14px;
+  padding:13px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:15px;
+  background:rgba(255,255,255,.04);
+}
+.mapping-source[hidden],.mapping-campaign-button[hidden]{display:none!important}
+.mapping-detected{grid-column:1/-1;font-size:11px;color:var(--muted);line-height:1.5}
+.mapping-campaign-button{grid-column:1/-1;justify-self:start;min-height:38px!important}
+@media(max-width:780px){
+  .mapping-source{grid-template-columns:1fr}
+  .mapping-campaign-button{width:100%}
+}

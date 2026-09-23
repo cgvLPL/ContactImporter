@@ -285,6 +285,9 @@ function cleanPhone(phone) {
 
     function resetProgram() {
       clearIOSDownloadLink();
+      if (window.ContactImporterMapping && typeof window.ContactImporterMapping.reset === 'function') {
+        window.ContactImporterMapping.reset();
+      }
       contacts = [];
       skippedRows = 0;
       excelFile.value = "";

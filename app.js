@@ -43,7 +43,8 @@
 
   applyBranding();
 
-  loadScript('./app-core.js')
+  loadScript('./spreadsheet-layout.js')
+    .then(() => loadScript('./app-core.js'))
     .then(() => loadScript('./app-export.js'))
     .then(() => loadScript('./app-runtime-fix.js'))
     .then(() => loadScript('./column-mapping.js'))

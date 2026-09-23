@@ -16,7 +16,10 @@ ContactImporter converts spreadsheet contact data into a single `.vcf` file for 
 - Import `.xlsx`, `.xls`, and `.csv` files.
 - Drag-and-drop or file-picker upload.
 - Custom column mapping for **Name**, **Phone Number**, **E-mail**, and **Notes**.
-- Auto-detects common Indonesian and English contact headers.
+- Auto-detects common Indonesian and English contact headers, including **Nama Lengkap**, **No Whatsapp**, and **Email Address**.
+- Finds the header row even when a Google Forms/event title appears above it; lets you change the worksheet and header row.
+- Recognizes **Jumlah Penonton / Jumlah Peserta** as optional registration details and preserves values in VCF contact notes and the manual backend sync.
+- Can copy a detected worksheet event title into the campaign name on request.
 - Exports only rows containing a Full Name plus a Phone Number, E-mail, or both.
 - Normalizes Indonesian-style name capitalization before export.
 - Supports event/campaign name, lead source, category, batch notes, and per-contact spreadsheet notes.
@@ -29,7 +32,7 @@ ContactImporter converts spreadsheet contact data into a single `.vcf` file for 
 
 ## Spreadsheet mapping
 
-The first worksheet is used and row 1 is treated as the header row.
+ContactImporter identifies the worksheet with the strongest contact headers and detects the actual header row (including sheets with an event title above the headers). You can change the worksheet or header row manually in Import; headerless sheets can be mapped with Column A/B/C labels.
 
 After import, choose which spreadsheet columns represent:
 
@@ -37,6 +40,7 @@ After import, choose which spreadsheet columns represent:
 - Phone Number — optional
 - E-mail — optional
 - Notes — optional
+- Extra registration detail (such as **Jumlah Penonton**) — optional; its labeled value is appended to each contact note
 
 A row is included only when it matches:
 
