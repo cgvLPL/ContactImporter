@@ -229,7 +229,7 @@
         const extraLabel = cleanValue(selectedHeaders[mapping.extra]) || 'Registration detail';
         noteParts.push(extraLabel + ': ' + extraValue);
       }
-      const note = noteParts.join('\\n');
+      const note = noteParts.join('\n');
 
       if (!fullName && !phone && !email && !note) continue;
 
@@ -243,7 +243,7 @@
       contacts.push({ fullName, phone, email, note, notes: note });
     }
 
-    mappingState.textContent = 'Mapping active';
+    mappingState.textContent = contacts.length + ' ready';
     mappingState.className = 'mapping-state ready';
     updateMappingSummary();
     return '';
@@ -320,7 +320,10 @@
     const header = headerRowIndex < 0
       ? 'No headers detected'
       : 'Headers on row ' + (firstRowNumber + headerRowIndex);
-    mappingDetected.textContent = header + ' · ' + selectedSheet.dataRows + ' response rows';
+    const firstDataIndex = headerRowIndex < 0 ? 0 : headerRowIndex + 1;
+    const responseRows = selectedSheet.rows.slice(firstDataIndex)
+      .filter(row => Array.isArray(row) && row.some(v => String(v == null ? '' : v).trim())).length;
+    mappingDetected.textContent = header + ' · ' + responseRows + ' response rows';
     if (selectedSheet.title) mappingDetected.textContent += ' · Event title detected';
     mappingUseTitle.hidden = !selectedSheet.title;
     if (selectedSheet.title) mappingUseTitle.title = selectedSheet.title;
