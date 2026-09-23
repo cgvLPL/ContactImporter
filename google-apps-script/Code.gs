@@ -1,6 +1,6 @@
 const CONTACT_IMPORTER = Object.freeze({
   name: 'ContactImporter Google Sheets Backend',
-  version: '2026.08.26-v3-campaign-history',
+  version: '2026.09.23-v4-authenticated-campaign-history',
   timezone: 'Asia/Jakarta',
   contactsSheet: 'Contacts',
   campaignsSheet: 'Campaigns',
@@ -65,6 +65,7 @@ const API_ACTIONS = Object.freeze({
 function doGet(event) {
   try {
     const action = String((event && event.parameter && event.parameter.action) || 'health').trim();
+    if (action !== 'health') throw new Error('Use authenticated POST for contact and campaign data.');
     const payload = {
       action: action,
       limit: Number((event && event.parameter && event.parameter.limit) || 1000),
@@ -91,6 +92,7 @@ function dispatch_(body) {
   if (!Object.prototype.hasOwnProperty.call(API_ACTIONS, action)) {
     throw new Error('Unsupported action.');
   }
+  if (action !== 'health') requireAuthorizedUser_(body);
   return withMeta_(API_ACTIONS[action](body));
 }
 
@@ -139,23 +141,71 @@ function removeLegacyContactImporterAccessKey() {
   return { ok: true, mode: 'permanent' };
 }
 
-function health_() {
-  const spreadsheet = spreadsheet_();
-  const contactsSheet = getContactsSheet_();
-  const campaignsSheet = getCampaignsSheet_();
-  const syncLogSheet = ensureSheet_(spreadsheet, CONTACT_IMPORTER.syncLogSheet, SYNC_LOG_HEADERS);
+/**
+ * Call once in the Apps Script editor after setting up a Google Web OAuth
+ * client restricted to the production Pages origin. Never publish credentials
+ * or allowed staff e-mails in GitHub.
+ * Example (only inside the private Apps Script editor):
+ * configureContactImporterSecurity('YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+ *   ['authorized-staff@example.com']);
+ */
+function configureContactImporterSecurity(clientId, allowedEmails) {
+  const id = safeText_(clientId, 300);
+  const allow = (Array.isArray(allowedEmails) ? allowedEmails : [])
+    .map(function (value) { return String(value || '').trim().toLowerCase(); })
+    .filter(function (value) { return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value); });
+  if (!/^[0-9]+-[a-z0-9-]+\\.apps\\.googleusercontent\\.com$/i.test(id) || !allow.length) {
+    throw new Error('A Google Web OAuth client ID and at least one allowed staff e-mail are required.');
+  }
+  const props = PropertiesService.getScriptProperties();
+  props.setProperty('CONTACTIMPORTER_GOOGLE_CLIENT_ID', id);
+  props.setProperty('CONTACTIMPORTER_ALLOWED_EMAILS', Array.from(new Set(allow)).join(','));
+  return { ok: true, staffCount: allow.length };
+}
 
+function requireAuthorizedUser_(body) {
+  const props = PropertiesService.getScriptProperties();
+  const clientId = String(props.getProperty('CONTACTIMPORTER_GOOGLE_CLIENT_ID') || '').trim();
+  const allowed = String(props.getProperty('CONTACTIMPORTER_ALLOWED_EMAILS') || '')
+    .split(',').map(function (v) { return v.trim().toLowerCase(); }).filter(Boolean);
+  // Fail closed when setup has not been completed.
+  if (!clientId || !allowed.length) throw new Error('Backend security is not configured. Contact the CGV administrator.');
+  const token = String((body && body.idToken) || '').trim();
+  if (!token || token.length > 8192) throw new Error('Google sign-in is required.');
+  // Google tokeninfo verifies ID-token signatures, expiry, issuer and audience.
+  // A local decoded JWT payload is never trusted for authorization.
+  const response = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo', {
+    method: 'post',
+    contentType: 'application/x-www-form-urlencoded',
+    payload: 'id_token=' + encodeURIComponent(token),
+    muteHttpExceptions: true
+  });
+  if (response.getResponseCode() !== 200) throw new Error('Google sign-in expired or invalid. Sign in again.');
+  const claims = JSON.parse(response.getContentText());
+  const email = String(claims.email || '').trim().toLowerCase();
+  if (claims.aud !== clientId ||
+      !['accounts.google.com', 'https://accounts.google.com'].includes(claims.iss) ||
+      (claims.email_verified !== true && claims.email_verified !== 'true') ||
+      Number(claims.exp || 0) * 1000 <= Date.now() ||
+      !allowed.includes(email)) {
+    throw new Error('This Google account is not authorized for CGV registration data.');
+  }
+  return email;
+}
+
+function health_() {
+  const props = PropertiesService.getScriptProperties();
+  const clientId = String(props.getProperty('CONTACTIMPORTER_GOOGLE_CLIENT_ID') || '').trim();
+  const allowlistConfigured = Boolean(String(props.getProperty('CONTACTIMPORTER_ALLOWED_EMAILS') || '').trim());
   return {
-    ok: Boolean(contactsSheet && campaignsSheet && syncLogSheet),
-    ready: Boolean(contactsSheet && campaignsSheet && syncLogSheet),
+    ok: true,
     service: CONTACT_IMPORTER.name,
     version: CONTACT_IMPORTER.version,
-    mode: 'permanent',
-    spreadsheetName: spreadsheet.getName(),
-    contactsSheet: CONTACT_IMPORTER.contactsSheet,
-    campaignsSheet: CONTACT_IMPORTER.campaignsSheet,
-    authRequired: false,
-    authenticated: true,
+    mode: 'authenticated',
+    ready: Boolean(clientId && allowlistConfigured),
+    authRequired: true,
+    authenticated: false,
+    clientId: clientId,
     now: new Date().toISOString(),
   };
 }
