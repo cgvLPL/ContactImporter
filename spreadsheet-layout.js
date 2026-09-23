@@ -80,7 +80,9 @@
 
     // If nothing recognizable is present, only assume headers when the first
     // populated row looks like labels, never when it already contains emails.
-    let headerIndex = chosen.score >= 8 ? chosen.index : -1;
+    const matchCount = chosen.matches
+      ? new Set(Object.values(chosen.matches).filter(index => index >= 0)).size : 0;
+    let headerIndex = chosen.score >= 8 && matchCount >= 2 ? chosen.index : -1;
     if (headerIndex < 0 && firstNonEmpty >= 0) {
       const row = safeRows[firstNonEmpty] || [];
       const populated = row.filter(v => String(v == null ? '' : v).trim() !== '');
