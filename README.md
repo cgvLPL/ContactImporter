@@ -127,6 +127,12 @@ Then open:
 http://localhost:8080
 ```
 
+## iPhone and iPad downloads
+
+On iPhone and iPad, **Download ZIP to Files** creates a ZIP containing the original `.vcf`. This avoids handing the VCF directly to iOS Contacts when downloading. Tap the ZIP in **Files → Downloads** (or your configured Safari download folder) to extract the VCF. If Safari blocks the automatic download, use the on-screen direct download link.
+
+On desktop and Android, **Download VCF** still exports the VCF directly. The ZIP is generated entirely inside your browser; nothing is uploaded as part of downloading.
+
 ## GitHub Pages deployment
 
 The repository includes:

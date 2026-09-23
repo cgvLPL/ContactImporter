@@ -88,6 +88,75 @@ function cleanPhone(phone) {
       return vcf;
     }
 
+
+    // iOS may hand a raw .vcf straight to Contacts. Package the original VCF
+    // inside a standards-compliant ZIP so Safari can save it to Files instead.
+    const isIOSExportDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const iosDownloadFallback = document.getElementById("iosDownloadFallback");
+    let activeIOSDownloadURL = null;
+
+    function clearIOSDownloadLink() {
+      if (activeIOSDownloadURL) {
+        URL.revokeObjectURL(activeIOSDownloadURL);
+        activeIOSDownloadURL = null;
+      }
+      if (iosDownloadFallback) {
+        iosDownloadFallback.removeAttribute("href");
+        iosDownloadFallback.hidden = true;
+      }
+    }
+
+    function createSingleFileZip(fileName, content) {
+      const encoder = new TextEncoder();
+      const nameBytes = encoder.encode(fileName);
+      const dataBytes = encoder.encode(content);
+      let crc = 0xffffffff;
+      for (const byte of dataBytes) {
+        crc ^= byte;
+        for (let bit = 0; bit < 8; bit++) {
+          crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+        }
+      }
+      crc = (crc ^ 0xffffffff) >>> 0;
+
+      const zipBytes = new Uint8Array(30 + nameBytes.length + dataBytes.length + 46 + nameBytes.length + 22);
+      const view = new DataView(zipBytes.buffer);
+      let offset = 0;
+      const write16 = value => { view.setUint16(offset, value, true); offset += 2; };
+      const write32 = value => { view.setUint32(offset, value >>> 0, true); offset += 4; };
+      const writeBytes = bytes => { zipBytes.set(bytes, offset); offset += bytes.length; };
+
+      write32(0x04034b50); // Local file header.
+      write16(20); write16(0x0800); write16(0); write16(0); write16(0);
+      write32(crc); write32(dataBytes.length); write32(dataBytes.length);
+      write16(nameBytes.length); write16(0);
+      writeBytes(nameBytes); writeBytes(dataBytes);
+
+      const directoryOffset = offset;
+      write32(0x02014b50); // Central directory entry.
+      write16(20); write16(20); write16(0x0800); write16(0); write16(0); write16(0);
+      write32(crc); write32(dataBytes.length); write32(dataBytes.length);
+      write16(nameBytes.length); write16(0); write16(0); write16(0); write16(0);
+      write32(0); write32(0);
+      writeBytes(nameBytes);
+
+      const directorySize = offset - directoryOffset;
+      write32(0x06054b50); // End of central directory.
+      write16(0); write16(0); write16(1); write16(1);
+      write32(directorySize); write32(directoryOffset); write16(0);
+      return new Blob([zipBytes], { type: "application/zip" });
+    }
+
+    function configureIOSDownload() {
+      if (!isIOSExportDevice) return;
+      const note = document.getElementById("iosDownloadNote");
+      if (note) note.hidden = false;
+      if (downloadBtn) {
+        downloadBtn.innerHTML = '<i data-lucide="folder-down"></i> Download ZIP to Files';
+      }
+    }
+
     function downloadVCF() {
       if (!contacts.length) {
         setStatus("There are no contacts to export", "error");
@@ -100,17 +169,37 @@ function cleanPhone(phone) {
       }
       const settings = getMarketingSettings();
       let filename = settings.event || "Marketing_Contacts";
-      filename = filename.replace(/[^a-z0-9_-]/gi, "_").replace(/_+/g, "_");
-      const blob = new Blob([content], { type: "text/vcard;charset=utf-8" });
+      filename = filename.replace(/[^a-z0-9_-]/gi, "_").replace(/_+/g, "_") || "Marketing_Contacts";
+
+      if (isIOSExportDevice) clearIOSDownloadLink();
+      const blob = isIOSExportDevice
+        ? createSingleFileZip(filename + ".vcf", content)
+        : new Blob([content], { type: "text/vcard;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = filename + ".vcf";
+      link.download = filename + (isIOSExportDevice ? ".zip" : ".vcf");
+      link.style.position = "absolute";
+      link.style.left = "-9999px";
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(url);
-      setStatus(contacts.length + " contacts exported", "success");
+
+      if (isIOSExportDevice) {
+        // Keep an actual tappable link if Safari blocks the synthetic click.
+        // Revoke the previous URL on the next export, reset, or page unload.
+        activeIOSDownloadURL = url;
+        if (iosDownloadFallback) {
+          iosDownloadFallback.href = url;
+          iosDownloadFallback.download = filename + ".zip";
+          iosDownloadFallback.hidden = false;
+        }
+        setStatus(contacts.length + " contacts packaged for download. Check Safari Downloads or Files.", "success");
+      } else {
+        // Safari and other mobile browsers can need time to begin reading the blob.
+        window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+        setStatus(contacts.length + " contacts exported", "success");
+      }
     }
 
     function renderPreview() {
@@ -161,10 +250,12 @@ function cleanPhone(phone) {
     }
 
     function updateDownloadState() {
+      clearIOSDownloadLink();
       downloadBtn.disabled = !contacts.length;
     }
 
     function updateLiveUI() {
+      clearIOSDownloadLink();
       const settings = getMarketingSettings();
       heroEvent.textContent = settings.event || "Untitled campaign";
       heroSource.textContent = settings.source || "No source";
@@ -193,6 +284,7 @@ function cleanPhone(phone) {
     }
 
     function resetProgram() {
+      clearIOSDownloadLink();
       contacts = [];
       skippedRows = 0;
       excelFile.value = "";
@@ -210,5 +302,7 @@ function cleanPhone(phone) {
       setStatus("Waiting for file");
     }
 
+    window.addEventListener("beforeunload", clearIOSDownloadLink);
     resetProgram();
+    configureIOSDownload();
     initIcons();

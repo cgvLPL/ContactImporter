@@ -154,3 +154,31 @@
 @media(prefers-reduced-motion:reduce){
   .mobile-workflow-tab{transition:none}
 }
+
+/* iPhone/iPad: explain Files download and provide a true tap link for Safari. */
+.ios-download-help{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  margin-top:14px;
+  padding:14px;
+  border:1px solid rgba(255,155,65,.27);
+  border-radius:15px;
+  background:rgba(255,155,65,.08);
+  font-size:12px;
+  line-height:1.55;
+}
+.ios-download-help[hidden],
+.ios-download-fallback[hidden]{display:none !important}
+.ios-download-help > svg{width:20px;height:20px;flex:none;color:#ff9b41}
+.ios-download-help strong{display:block;font-size:13px}
+.ios-download-help p{margin:5px 0 0;opacity:.88}
+.ios-download-fallback{
+  display:inline-block;
+  margin-top:10px;
+  color:#ffac65;
+  font-weight:750;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.ios-download-fallback:focus-visible{outline:2px solid #ffac65;outline-offset:4px}
