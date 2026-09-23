@@ -308,6 +308,12 @@
     lastSpreadsheetRows = selectedSheet.rows;
     firstRowNumber = selectedSheet.firstRowNumber;
     headerRowIndex = selectedSheet.headerIndex;
+    // Reflect a manual worksheet change in the uploaded file label as well.
+    const uploadedFileChip = document.getElementById('fileChip');
+    if (uploadedFileChip && uploadedFileChip.textContent && !uploadedFileChip.textContent.startsWith('Reading ')) {
+      const fileLabel = uploadedFileChip.textContent.split(' · ')[0];
+      uploadedFileChip.textContent = fileLabel + ' · ' + selectedSheet.name;
+    }
     headersSignature = '';
     showHeaderRows(selectedSheet);
     setupMapping(lastSpreadsheetRows);
