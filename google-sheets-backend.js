@@ -5,6 +5,11 @@
   const FIXED_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyLKEpsopYNkJlMf_65tfOyyPwTeOXUnl-Juk7gXX4R9nSOj4PmGpdT3ILL0cO-v_5fsw/exec';
   const LEGACY_STORAGE_KEY = 'contactImporter.googleSheets.accessKey';
   const MAX_CLIENT_BATCH = 200;
+  let verifiedCredential = '';
+  let credentialExpiresAt = 0;
+  let securityReady = false;
+  let googleClientId = '';
+  let busy = false;
 
   const tabStage = document.querySelector('.tab-stage');
   const nav = document.querySelector('.nav');
@@ -65,6 +70,12 @@
           </div>
         </div>
 
+        <div class="backend-signin glass" id="backendSignInPanel">
+          <strong>Authorized CGV staff only</strong>
+          <p id="backendAuthMessage">Checking secure Google sign-in configuration…</p>
+          <div id="backendGoogleButton"></div>
+          <button type="button" class="glass-btn" id="backendSignOut" hidden>Sign out</button>
+        </div>
         <div class="settings-actions backend-config-actions">
           <button class="glass-btn" id="backendTest" type="button"><i data-lucide="activity"></i>Test connection</button>
         </div>
@@ -118,6 +129,9 @@
     campaignPanel.appendChild(campaignHistoryCard);
   }
 
+  const authMessage = document.getElementById('backendAuthMessage');
+  const googleButton = document.getElementById('backendGoogleButton');
+  const signOutButton = document.getElementById('backendSignOut');
   const testButton = document.getElementById('backendTest');
   const syncButton = document.getElementById('backendSync');
   const loadButton = document.getElementById('backendLoad');
@@ -135,16 +149,77 @@
     return meta ? String(meta.content || '') : 'local';
   }
 
-  function legacyAccessKey() {
-    try {
-      return String(localStorage.getItem(LEGACY_STORAGE_KEY) || '').trim();
-    } catch (error) {
-      return '';
-    }
+  function signedIn() {
+    return securityReady && verifiedCredential && Date.now() + 60000 < credentialExpiresAt;
   }
 
   function getConnection() {
-    return Object.freeze({ endpoint: FIXED_ENDPOINT, locked: true });
+    return Object.freeze({ endpoint: FIXED_ENDPOINT, locked: true,
+      authRequired: true, authenticated: Boolean(signedIn()), configured: securityReady });
+  }
+
+  function updateAuthUI() {
+    const active = signedIn();
+    if (authMessage) authMessage.textContent = !securityReady
+      ? 'Backend sign-in has not been configured. Follow the private Apps Script setup instructions.'
+      : active
+        ? 'Signed in. Contact data is accessible only to approved staff.'
+        : 'Sign in with your approved Google account to load or sync contacts.';
+    if (signOutButton) signOutButton.hidden = !active;
+    if (googleButton) googleButton.hidden = active || !securityReady;
+    [syncButton, loadButton, historyRefreshButton].filter(Boolean).forEach(button => {
+      button.disabled = busy || !active;
+    });
+  }
+
+  function signOut() {
+    verifiedCredential = '';
+    credentialExpiresAt = 0;
+    if (window.google && google.accounts && google.accounts.id) {
+      google.accounts.id.disableAutoSelect();
+    }
+    if (historyList) historyList.innerHTML = '<div class="campaign-history-empty">Sign in to view saved campaigns.</div>';
+    if (historySummary) historySummary.textContent = 'Sign in required';
+    updateAuthUI();
+  }
+
+  function prepareGoogleButton() {
+    if (!securityReady || !googleClientId || !googleButton) return;
+    function mount() {
+      if (!window.google || !google.accounts || !google.accounts.id) return;
+      googleButton.innerHTML = '';
+      google.accounts.id.initialize({
+        client_id: googleClientId,
+        auto_select: false,
+        callback: async response => {
+          const token = String(response && response.credential || '');
+          if (!token) return;
+          // Backend verifies the ID token. This local expiry is only UX.
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+            verifiedCredential = token;
+            credentialExpiresAt = Number(payload.exp || 0) * 1000;
+            await postAction('listCampaigns');
+            setBackendStatus('success', 'Google sign-in verified', 'Authorized staff access enabled.', 'Signed in');
+            updateAuthUI();
+            await refreshCampaignHistory({ quiet: true });
+          } catch (error) {
+            signOut();
+            setBackendStatus('error', 'Sign-in failed', error.message || 'Access denied.', 'Unauthorized');
+          }
+        }
+      });
+      google.accounts.id.renderButton(googleButton, { type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', width: 240 });
+    }
+    if (window.google && google.accounts && google.accounts.id) return mount();
+    if (document.getElementById('contactImporterGoogleIdentity')) return;
+    const script = document.createElement('script');
+    script.id = 'contactImporterGoogleIdentity';
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.onload = mount;
+    script.onerror = () => { if (authMessage) authMessage.textContent = 'Could not load Google sign-in. Check your connection.'; };
+    document.head.appendChild(script);
   }
 
   function setBackendStatus(state, title, copy, badge) {
@@ -159,18 +234,18 @@
     if (window.lucide) lucide.createIcons();
   }
 
-  function setButtonsBusy(busy) {
-    [testButton, syncButton, loadButton, historyRefreshButton].filter(Boolean).forEach(button => {
-      button.disabled = Boolean(busy);
-    });
-    backendPanel.classList.toggle('backend-busy', Boolean(busy));
-    if (campaignHistoryCard) campaignHistoryCard.classList.toggle('backend-busy', Boolean(busy));
+  function setButtonsBusy(nextBusy) {
+    busy = Boolean(nextBusy);
+    if (testButton) testButton.disabled = busy;
+    backendPanel.classList.toggle('backend-busy', busy);
+    if (campaignHistoryCard) campaignHistoryCard.classList.toggle('backend-busy', busy);
+    updateAuthUI();
   }
 
   async function postAction(action, payload = {}) {
+    if (action !== 'health' && !signedIn()) throw new Error('Sign in with an authorized Google account first.');
     const body = { action, clientVersion: appVersion(), ...payload };
-    const legacyKey = legacyAccessKey();
-    if (legacyKey) body.accessKey = legacyKey;
+    if (action !== 'health') body.idToken = verifiedCredential;
 
     const response = await fetch(FIXED_ENDPOINT, {
       method: 'POST',
@@ -188,7 +263,11 @@
       throw new Error('The Apps Script response was not JSON. Confirm the deployment is an active Web App using the production /exec URL.');
     }
 
-    if (!result || result.ok !== true) throw new Error((result && result.error) || 'The backend returned an error.');
+    if (!result || result.ok !== true) {
+      const message = (result && result.error) || 'The backend returned an error.';
+      if (/token|expired|not authorized|google sign-in/i.test(message)) signOut();
+      throw new Error(message);
+    }
     return result;
   }
 
@@ -348,27 +427,30 @@
   async function testConnection(options = {}) {
     const quiet = Boolean(options.quiet);
     setButtonsBusy(true);
-    setBackendStatus('busy', 'Checking backend…', 'Contacting the permanent Google Apps Script deployment.', 'Checking');
-
+    setBackendStatus('busy', 'Checking backend…', 'Checking security configuration.', 'Checking');
     try {
       const result = await postAction('health');
-      if (result.authRequired && !result.authenticated) {
-        throw new Error('The deployed Apps Script is still using the legacy access-key backend. Update it to the permanent backend release or retain the previously configured browser credential.');
+      securityReady = Boolean(result.authRequired && result.ready && result.clientId &&
+        String(result.version || '').includes('authenticated'));
+      googleClientId = securityReady ? String(result.clientId) : '';
+      updateAuthUI();
+      if (!securityReady) {
+        setBackendStatus('error', 'Secure backend setup required',
+          'Deploy the authenticated Apps Script version and configure a Google OAuth Web client and approved staff e-mails. Contact exports still work locally.',
+          'Setup required');
+        return false;
       }
-      const campaignAware = String(result.version || '').includes('campaign-history');
-      setBackendStatus(
-        'success',
-        'Google Sheets connected',
-        campaignAware
-          ? `${result.spreadsheetName || 'Google Sheet'} · campaign history enabled · backend ${result.version || ''}`.trim()
-          : `${result.spreadsheetName || 'Google Sheet'} · connected, but Apps Script still needs the campaign-history update.`.trim(),
-        campaignAware ? 'Connected' : 'Update backend'
-      );
-      syncMeta.textContent = `Permanent backend · last checked ${new Date().toLocaleTimeString()}`;
-      refreshCampaignHistory({ quiet: true });
+      prepareGoogleButton();
+      setBackendStatus(signedIn() ? 'success' : 'busy',
+        signedIn() ? 'Secure backend connected' : 'Google sign-in required',
+        signedIn() ? 'Authorized staff account verified.' : 'Use the Google sign-in button to access campaign history or sync contacts.',
+        signedIn() ? 'Signed in' : 'Sign in');
+      if (signedIn()) await refreshCampaignHistory({ quiet: true });
+      syncMeta.textContent = 'Authenticated backend · ' + new Date().toLocaleTimeString();
       return true;
     } catch (error) {
-      console.error('Backend connection test failed:', error);
+      securityReady = false;
+      updateAuthUI();
       setBackendStatus('error', 'Backend unavailable', error.message || String(error), 'Error');
       if (!quiet && typeof setStatus === 'function') setStatus('Google Sheets backend unavailable', 'error');
       return false;
@@ -378,6 +460,10 @@
   }
 
   async function syncCurrentContacts() {
+    if (!signedIn()) {
+      setBackendStatus('error', 'Google sign-in required', 'Sign in before syncing campaign contacts.', 'Sign in');
+      return false;
+    }
     if (!Array.isArray(contacts) || !contacts.length) {
       setBackendStatus('error', 'Nothing to sync', 'Import or load at least one valid contact first.', 'No contacts');
       return;
@@ -409,11 +495,14 @@
       setBackendStatus('success', 'Campaign synced', `${accepted} contact${accepted === 1 ? '' : 's'} saved under “${campaignLabel}” · ${inserted} new · ${updated} updated.`, 'Synced');
       syncMeta.textContent = `Last sync ${new Date().toLocaleString()} · ${campaignLabel} · ${accepted} contacts`;
       if (typeof setStatus === 'function') setStatus(`${campaignLabel}: ${accepted} contacts synced`, 'success');
+      if (window.ContactImporterRecovery) window.ContactImporterRecovery.markSynced();
       await refreshCampaignHistory({ quiet: true });
+      return true;
     } catch (error) {
       console.error('Google Sheets sync failed:', error);
       setBackendStatus('error', 'Sync failed', error.message || String(error), 'Error');
       if (typeof setStatus === 'function') setStatus('Google Sheets sync failed', 'error');
+      return false;
     } finally {
       setButtonsBusy(false);
     }
@@ -441,6 +530,13 @@
   }
 
   async function loadFromGoogleSheet(options = {}) {
+    if (!signedIn()) {
+      setBackendStatus('error', 'Sign-in required', 'Sign in before loading saved contacts.', 'Sign in');
+      return false;
+    }
+    if (window.ContactImporterRecovery && window.ContactImporterRecovery.hasUnsavedChanges()) {
+      if (!window.confirm('Replace unsynced contacts? Download a backup first to avoid losing local edits.')) return false;
+    }
     const campaignId = String(options.campaignId || '').trim();
     const campaignName = String(options.campaignName || '').trim();
     const selectedCampaign = Boolean(campaignId || campaignName);
@@ -483,6 +579,7 @@
 
       contacts = loaded;
       skippedRows = 0;
+      if (window.ContactImporterRecovery) window.ContactImporterRecovery.markSynced();
       restoreSharedCampaignSettings(rows, campaignName);
 
       if (typeof updateStats === 'function') updateStats();
@@ -507,6 +604,8 @@
     }
   }
 
+  if (signOutButton) signOutButton.addEventListener('click', signOut);
+  updateAuthUI();
   testButton.addEventListener('click', () => testConnection({ quiet: false }));
   syncButton.addEventListener('click', syncCurrentContacts);
   loadButton.addEventListener('click', () => loadFromGoogleSheet({ openContacts: true }));
