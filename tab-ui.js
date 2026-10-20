@@ -21,7 +21,7 @@
   const tabCopy = {
     overviewSection: {
       eyebrow: 'Overview',
-      title: 'Campaign contact workspace',
+      title: 'Your contact workspace',
       subtitle: 'Follow one clear workflow: campaign, import, review, export, then sync when needed.'
     },
     campaignSection: {
