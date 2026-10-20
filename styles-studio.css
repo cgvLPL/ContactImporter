@@ -140,3 +140,30 @@ body .campaign-summary-card .glass-btn { background:#fff !important; color:#2525
 body .campaign-title { font-weight:500 !important; letter-spacing:-.045em !important; }
 body .skip-link { position:fixed; top:10px; left:16px; z-index:1000; padding:12px 18px; border-radius:99px; background:#252525; color:#fff; transform:translateY(-150%); }
 body .skip-link:focus { transform:translateY(0); }
+
+/* Approved CGV ContactImporter artwork. The image is kept intact; its white
+   presentation margins are clipped by the responsive header frame. */
+body .mobile-bar {
+  display:flex !important;
+  width:min(1540px,calc(100% - 40px)) !important;
+  margin:20px auto 0 !important;
+  padding:12px 24px !important;
+  min-height:0 !important;
+  background:#fff !important;
+  border:1px solid #e3e3df !important;
+  border-radius:26px !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important;
+  justify-content:space-between !important;
+}
+body .mobile-brand { width:min(620px,100%); min-width:0; flex:0 1 620px; }
+body .brand-artwork { display:flex; align-items:center; width:100%; aspect-ratio:6 / 1; overflow:hidden; background:#fff; border-radius:12px; }
+body .brand-artwork img { display:block; width:100%; height:auto; flex:none; }
+body .brand-home { min-height:0 !important; padding:0 !important; margin-bottom:26px; border-radius:12px !important; }
+body .brand-artwork-sidebar { aspect-ratio:5 / 1; }
+body .header-status { color:#62625c !important; background:#f4f4f0 !important; border-color:#e3e3df !important; box-shadow:none !important; }
+body .header-status-dot { background:#80509e !important; box-shadow:none !important; }
+@media(max-width:860px) {
+  body .mobile-bar { width:calc(100% - 24px) !important; margin-top:12px !important; padding:10px 14px !important; border-radius:22px !important; }
+  body .mobile-brand { margin:auto; }
+}
