@@ -1,11 +1,8 @@
 (() => {
-  const CGV_LOGO_URL = 'https://commons.wikimedia.org/wiki/Special:FilePath/CGV_logo.svg';
-
   const brandLockup = (variant) => `
-    <span class="brand-lockup brand-lockup-${variant}" aria-label="CGV | ContactImporter">
-      <img class="brand-cgv-logo" src="${CGV_LOGO_URL}" alt="CGV" decoding="async">
-      <span class="brand-lockup-divider" aria-hidden="true"></span>
-      <span class="brand-product-name"><span>Contact</span><strong>Importer</strong></span>
+    <span class="brand-artwork brand-artwork-${variant}">
+      <img src="./assets/contactimporter-logo.png" alt="CGV | ContactImporter"
+        width="2048" height="683" decoding="async" fetchpriority="high">
     </span>
   `;
 

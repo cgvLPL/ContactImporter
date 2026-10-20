@@ -1,6 +1,5 @@
 <p align="center">
-  <img src="https://commons.wikimedia.org/wiki/Special:FilePath/CGV_logo.svg" alt="CGV" width="145">
-  &nbsp;&nbsp;&nbsp;<strong>│&nbsp;&nbsp;ContactImporter</strong>
+  <img src="./assets/contactimporter-logo.png" alt="CGV | ContactImporter" width="680">
 </p>
 
 <p align="center">
@@ -115,7 +114,7 @@ Contact data is sent to Google Sheets only when the user explicitly presses **Sy
 
 The backend endpoint is fixed in the public frontend source. UI locking prevents ordinary users from changing it in the app, but it is not an authentication boundary; a public Apps Script endpoint can still be called directly by someone who knows the URL.
 
-External CDN assets currently used by the interface include SheetJS and Lucide Icons. The CGV brand mark displayed in the app and README uses the official CGV logo artwork served from Wikimedia Commons.
+External CDN assets currently used by the interface include SheetJS and Lucide Icons. The approved CGV ContactImporter logo displayed in the app and README is served locally from `assets/contactimporter-logo.png`.
 
 ## Run locally
 
@@ -189,8 +188,9 @@ ContactImporter/
 
 ## Branding
 
-The production lockup is **CGV | ContactImporter**: the official red CGV mark, a neutral divider, and the ContactImporter wordmark. The same lockup language is used in the web app and README.
+The production lockup is **CGV | ContactImporter**: the red CGV mark, a warm gradient divider, and the ContactImporter wordmark. The same lockup language is used in the web app and README.
 
+- `assets/contactimporter-logo.png` — approved full logo, used in the responsive app header and sidebar.
 - `assets/logo.svg` — legacy/fallback ContactImporter lockup asset.
 - `assets/logo-mark.svg` — square icon/favicon mark.
 
