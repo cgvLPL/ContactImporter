@@ -201,3 +201,8 @@ No license has been specified yet.
 ## Interface theme
 
 `styles-studio.css` is the final presentation layer. It applies the reference-inspired light monochrome palette, lilac metrics, charcoal campaign card, rounded controls, and responsive workflow navigation across all six sections. Existing import, mapping, campaign, backend, and export logic is preserved. Mobile form text is at least 16px to avoid unwanted iOS input zoom; keyboard focus and reduced-motion preferences are supported.
+
+
+## Starting a visit
+
+Every page load opens an empty campaign workspace and prompts for a new campaign name. Saved campaigns never open automatically. Choose **Browse history** (or press Escape), then **Open** a saved campaign to review its contacts. Use **Export** to download its VCF again, or the ZIP option on iPhone/iPad. History contains campaigns synced to Google Sheets; unsynced contacts are not persisted across page reloads. **New campaign** still saves a populated workspace successfully before clearing it and opening the naming prompt.

@@ -27,7 +27,7 @@
     campaignSection: {
       eyebrow: 'Campaigns · Step 1',
       title: 'Campaign workspace',
-      subtitle: 'Create a new campaign, reopen previous campaign history, or continue the latest synced campaign.'
+      subtitle: 'Start a new campaign, or browse History to view and re-download a saved campaign.'
     },
     importSection: {
       eyebrow: 'Import · Step 2',

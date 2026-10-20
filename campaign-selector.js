@@ -6,8 +6,6 @@
   const historyCard = document.querySelector('.campaign-history-card');
   if (!historyList || !historyCard) return;
 
-  let initialAutoOpenDone = false;
-
   const picker = document.createElement('div');
   picker.className = 'campaign-history-picker';
   picker.innerHTML = `
@@ -17,7 +15,7 @@
         <option value="">Choose a campaign…</option>
         <option value="__all__">All campaigns</option>
       </select>
-      <span id="campaignHistorySelectMeta">The latest campaign opens automatically.</span>
+      <span id="campaignHistorySelectMeta">Choose a past campaign to view its contacts or download it again.</span>
     </div>
     <button class="glass-btn primary campaign-history-picker-open" id="campaignHistoryOpenSelected" type="button" disabled>
       <i data-lucide="folder-open"></i>
@@ -63,12 +61,11 @@
 
     if (current && Array.from(select.options).some(option => option.value === current)) {
       select.value = current;
-    } else if (campaigns.length) {
-      select.value = campaigns[0].id;
+    } else {
+      select.value = '';
     }
 
     updatePickerState();
-    maybeAutoOpenLatest(campaigns);
   }
 
   function escapeOption(value) {
@@ -87,7 +84,9 @@
     openButton.disabled = !hasSelection;
 
     if (!hasSelection) {
-      selectMeta.textContent = 'No synced campaigns available yet.';
+      selectMeta.textContent = cardCampaigns().length
+        ? 'Choose a past campaign to view its contacts or download it again.'
+        : 'No synced campaigns available yet.';
       return;
     }
 
@@ -117,25 +116,6 @@
     } finally {
       updatePickerState();
     }
-  }
-
-  function maybeAutoOpenLatest(campaigns) {
-    if (initialAutoOpenDone || !campaigns.length || !select) return;
-
-    const latest = campaigns[0];
-    if (!latest || !latest.id) return;
-
-    initialAutoOpenDone = true;
-    select.value = latest.id;
-    updatePickerState();
-
-    const workspaceAlreadyHasContacts = typeof contacts !== 'undefined' && Array.isArray(contacts) && contacts.length > 0;
-    if (workspaceAlreadyHasContacts) return;
-
-    window.setTimeout(() => {
-      if (select.value !== latest.id) return;
-      openSelected();
-    }, 120);
   }
 
   select.addEventListener('change', updatePickerState);
