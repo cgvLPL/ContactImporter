@@ -213,7 +213,7 @@
       savedName,
       phone: contact.phone || '',
       email: contact.email || '',
-      notes: contact.notes || '',
+      notes: contact.note || contact.notes || '',
       event: settings.event || '',
       source: settings.source || '',
       category: settings.category || '',
@@ -377,15 +377,20 @@
     }
   }
 
-  async function syncCurrentContacts() {
-    if (!Array.isArray(contacts) || !contacts.length) {
+  let syncInProgress = false;
+  async function syncCurrentContacts(options = {}) {
+    // Export passes the exact batch/settings used to create the downloaded file.
+    const batch = Array.isArray(options.contacts) ? options.contacts : contacts;
+    if (syncInProgress) return { ok: false, error: 'Another sync is running. Please retry in a moment.' };
+    if (!Array.isArray(batch) || !batch.length) {
       setBackendStatus('error', 'Nothing to sync', 'Import or load at least one valid contact first.', 'No contacts');
-      return;
+      return { ok: false, error: 'No contacts to sync.' };
     }
 
     setButtonsBusy(true);
-    const settings = currentMarketingSettings();
-    const outgoing = contacts.map(contact => backendContact(contact, settings));
+    syncInProgress = true;
+    const settings = options.settings || currentMarketingSettings();
+    const outgoing = batch.map(contact => backendContact(contact, settings));
     const campaignLabel = settings.event || 'Unassigned';
     let inserted = 0;
     let updated = 0;
@@ -401,6 +406,7 @@
           contacts: chunk,
           requestId: `${requestId}-${Math.floor(start / MAX_CLIENT_BATCH) + 1}`,
         });
+        if (Number(result.accepted) !== chunk.length) throw new Error('The backend did not confirm every contact. Retry saving this campaign.');
         inserted += Number(result.inserted || 0);
         updated += Number(result.updated || 0);
         accepted += Number(result.accepted || 0);
@@ -410,11 +416,14 @@
       syncMeta.textContent = `Last sync ${new Date().toLocaleString()} · ${campaignLabel} · ${accepted} contacts`;
       if (typeof setStatus === 'function') setStatus(`${campaignLabel}: ${accepted} contacts synced`, 'success');
       await refreshCampaignHistory({ quiet: true });
+      return { ok: true, accepted };
     } catch (error) {
       console.error('Google Sheets sync failed:', error);
       setBackendStatus('error', 'Sync failed', error.message || String(error), 'Error');
       if (typeof setStatus === 'function') setStatus('Google Sheets sync failed', 'error');
+      return { ok: false, error: error.message || String(error) };
     } finally {
+      syncInProgress = false;
       setButtonsBusy(false);
     }
   }

@@ -110,7 +110,7 @@ See [`google-apps-script/README.md`](./google-apps-script/README.md) for the ful
 
 The uploaded spreadsheet is parsed locally in the browser.
 
-Contact data is sent to Google Sheets only when the user explicitly presses **Sync current contacts**. Automatic upload is not enabled.
+Contact data is sent to Google Sheets when the user downloads contacts, presses **Sync current contacts**, or starts a new campaign with a populated workspace. Downloading automatically syncs the exported batch to Campaign History.
 
 The backend endpoint is fixed in the public frontend source. UI locking prevents ordinary users from changing it in the app, but it is not an authentication boundary; a public Apps Script endpoint can still be called directly by someone who knows the URL.
 
@@ -134,7 +134,7 @@ http://localhost:8080
 
 On iPhone and iPad, **Download ZIP to Files** creates a ZIP containing the original `.vcf`. This avoids handing the VCF directly to iOS Contacts when downloading. Tap the ZIP in **Files → Downloads** (or your configured Safari download folder) to extract the VCF. If Safari blocks the automatic download, use the on-screen direct download link.
 
-On desktop and Android, **Download VCF** still exports the VCF directly. The ZIP is generated entirely inside your browser; nothing is uploaded as part of downloading.
+On desktop and Android, **Download VCF** still exports the VCF directly. The ZIP is generated entirely inside your browser. Requesting a download also saves the exported campaign to Google Sheets History.
 
 ## GitHub Pages deployment
 
@@ -205,4 +205,11 @@ No license has been specified yet.
 
 ## Starting a visit
 
-Every page load opens an empty campaign workspace and prompts for a new campaign name. Saved campaigns never open automatically. Choose **Browse history** (or press Escape), then **Open** a saved campaign to review its contacts. Use **Export** to download its VCF again, or the ZIP option on iPhone/iPad. History contains campaigns synced to Google Sheets; unsynced contacts are not persisted across page reloads. **New campaign** still saves a populated workspace successfully before clearing it and opening the naming prompt.
+Every page load opens an empty campaign workspace and prompts for a new campaign name. Saved campaigns never open automatically. Choose **Browse history** (or press Escape), then **Open** a saved campaign to review its contacts. Use **Export** to download its VCF again, or the ZIP option on iPhone/iPad. History contains campaigns synced to Google Sheets, including automatic sync after downloading; unsynced contacts are not persisted across page reloads. **New campaign** still saves a populated workspace successfully before clearing it and opening the naming prompt.
+
+
+## Save on download
+
+VCF and iOS ZIP downloads automatically save the exact exported contacts and campaign settings to Google Sheets, then refresh History. The download is requested before any network wait so Safari can retain its download user gesture. Browsers cannot confirm completion of a disk download; the UI reports “Download requested” separately from save success.
+
+If saving fails, the file download remains available. Keep the page open and choose **Retry saving campaign**, which retries the original exported batch even if the workspace has changed. A new export waits until the previous save has succeeded. Closing or refreshing with a pending/failed save prompts the browser's standard leave-page warning when supported. Retry data is kept in memory only.

@@ -138,7 +138,7 @@
         <button type="submit" class="glass-btn primary">Create campaign</button>
         <button type="button" class="glass-btn" id="campaignWelcomeHistory">Browse history</button>
       </div>
-      <p class="campaign-welcome-note">Contacts are saved to History when synced to Google Sheets.</p>
+      <p class="campaign-welcome-note">Downloading contacts automatically saves them to History. You can also sync from Backend.</p>
     </form>
   `;
   document.body.appendChild(welcome);
