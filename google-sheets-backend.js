@@ -106,7 +106,7 @@
         <div>
           <div class="section-kicker">Synced campaigns</div>
           <h2>Campaign history</h2>
-          <p>Contacts are separated by campaign in the backend. Select a campaign to load only the contacts related to it.</p>
+          <p>Saved campaigns stay here until you open one. Select Open to view its contacts, then Export to download it again.</p>
         </div>
         <button class="glass-btn" id="campaignHistoryRefresh" type="button"><i data-lucide="refresh-cw"></i>Refresh history</button>
       </div>

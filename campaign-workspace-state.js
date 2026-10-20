@@ -72,7 +72,7 @@
     }
 
     window.setTimeout(() => {
-      if (eventNameInput) eventNameInput.focus({ preventScroll: true });
+      if (eventNameInput && !document.getElementById('campaignWelcomeDialog')?.open) eventNameInput.focus({ preventScroll: true });
     }, 0);
   }
 
@@ -119,11 +119,79 @@
     }
   }
 
+  // Every document load starts empty. History is fetched separately and only
+  // enters the workspace after an explicit Open action in Campaign History.
+  const welcome = document.createElement('dialog');
+  welcome.id = 'campaignWelcomeDialog';
+  welcome.className = 'campaign-welcome';
+  welcome.setAttribute('aria-labelledby', 'campaignWelcomeTitle');
+  welcome.setAttribute('aria-describedby', 'campaignWelcomeDescription');
+  welcome.innerHTML = `
+    <form id="campaignWelcomeForm">
+      <div class="section-kicker">A fresh start</div>
+      <h2 id="campaignWelcomeTitle">Start a new campaign</h2>
+      <p id="campaignWelcomeDescription">Give this batch a name before adding contacts. Your saved campaigns stay in History, ready to view or download again.</p>
+      <label for="campaignWelcomeName">Campaign name</label>
+      <input id="campaignWelcomeName" name="campaignName" type="text" required
+        autocomplete="off" placeholder="e.g. Jakarta Expo 2026" autofocus>
+      <div class="campaign-welcome-actions">
+        <button type="submit" class="glass-btn primary">Create campaign</button>
+        <button type="button" class="glass-btn" id="campaignWelcomeHistory">Browse history</button>
+      </div>
+      <p class="campaign-welcome-note">Contacts are saved to History when synced to Google Sheets.</p>
+    </form>
+  `;
+  document.body.appendChild(welcome);
+  const welcomeName = document.getElementById('campaignWelcomeName');
+
+  function openWelcome() {
+    welcomeName.value = '';
+    welcomeName.setCustomValidity('');
+    welcome.showModal();
+    welcomeName.focus();
+  }
+
+  welcomeName.addEventListener('input', () => welcomeName.setCustomValidity(''));
+  document.getElementById('campaignWelcomeForm').addEventListener('submit', event => {
+    event.preventDefault();
+    const name = welcomeName.value.trim();
+    if (!name) {
+      welcomeName.setCustomValidity('Enter a campaign name.');
+      welcomeName.reportValidity();
+      return;
+    }
+    eventNameInput.value = name;
+    dispatchCampaignFieldEvents();
+    welcome.close();
+    window.ContactImporterTabs.open('campaignSection');
+    if (sourceInput) sourceInput.focus({ preventScroll: true });
+  });
+
+  function browseHistory() {
+    welcome.close();
+    window.ContactImporterTabs.open('campaignSection');
+    const history = document.querySelector('.campaign-history-card');
+    if (history) {
+      history.setAttribute('tabindex', '-1');
+      history.focus({ preventScroll: true });
+      history.scrollIntoView({ block: 'start', behavior: 'auto' });
+    }
+  }
+  document.getElementById('campaignWelcomeHistory').addEventListener('click', browseHistory);
+  // Escape provides the same accessible exit as Browse history.
+  welcome.addEventListener('cancel', event => {
+    event.preventDefault();
+    browseHistory();
+  });
+
   newCampaignButton.addEventListener('click', async () => {
     const preserved = await savePreviousCampaignIfNeeded();
     if (!preserved) return;
     clearLocalCampaignWorkspace();
+    openWelcome();
   });
 
+  clearLocalCampaignWorkspace();
+  openWelcome();
   if (window.lucide) lucide.createIcons();
 })();
