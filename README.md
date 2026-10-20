@@ -26,7 +26,7 @@ ContactImporter converts spreadsheet contact data into a single `.vcf` file for 
 - Custom saved-name formats for campaign contacts.
 - Live contact preview and import statistics.
 - Generates one bulk VCF file in the browser.
-- Tab-based responsive interface aligned with the CGV Knowledge Academy design system.
+- Responsive studio interface with monochrome cards, lilac accents, pill navigation, and visible keyboard focus.
 - Forced update prompt for newer GitHub Pages deployments.
 - Permanent Google Sheets + Apps Script backend with manual push/pull sync.
 
@@ -189,7 +189,7 @@ ContactImporter/
 
 ## Branding
 
-The production lockup is **CGV | ContactImporter**: the official red CGV mark, a warm orange divider, and the ContactImporter wordmark. The same lockup language is used in the web app and README.
+The production lockup is **CGV | ContactImporter**: the official red CGV mark, a neutral divider, and the ContactImporter wordmark. The same lockup language is used in the web app and README.
 
 - `assets/logo.svg` — legacy/fallback ContactImporter lockup asset.
 - `assets/logo-mark.svg` — square icon/favicon mark.
@@ -197,3 +197,7 @@ The production lockup is **CGV | ContactImporter**: the official red CGV mark, a
 ## License
 
 No license has been specified yet.
+
+## Interface theme
+
+`styles-studio.css` is the final presentation layer. It applies the reference-inspired light monochrome palette, lilac metrics, charcoal campaign card, rounded controls, and responsive workflow navigation across all six sections. Existing import, mapping, campaign, backend, and export logic is preserved. Mobile form text is at least 16px to avoid unwanted iOS input zoom; keyboard focus and reduced-motion preferences are supported.
