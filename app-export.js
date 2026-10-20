@@ -157,7 +157,56 @@ function cleanPhone(phone) {
       }
     }
 
+    let exportSyncPending = false;
+    let retryExportSnapshot = null;
+
+    function showExportSync(message, state) {
+      const status = document.getElementById('exportSyncStatus');
+      const retry = document.getElementById('retryExportSync');
+      if (status) {
+        status.hidden = false;
+        status.textContent = message;
+        status.dataset.state = state;
+      }
+      if (retry) retry.hidden = state !== 'error';
+    }
+
+    async function syncDownloadedCampaign(snapshot) {
+      if (exportSyncPending) return;
+      exportSyncPending = true;
+      downloadBtn.disabled = true;
+      showExportSync('Download requested. Saving this campaign to History…', 'busy');
+      try {
+        if (!window.ContactImporterBackend?.sync) throw new Error('Google Sheets is unavailable.');
+        const result = await window.ContactImporterBackend.sync(snapshot);
+        if (!result?.ok) throw new Error(result?.error || 'The campaign could not be saved.');
+        retryExportSnapshot = null;
+        showExportSync('Download requested. Campaign saved and synced to History.', 'success');
+      } catch (error) {
+        retryExportSnapshot = snapshot;
+        showExportSync('Download requested, but the campaign is not fully saved. ' + error.message + ' Keep this page open and retry saving.', 'error');
+      } finally {
+        exportSyncPending = false;
+        downloadBtn.disabled = !contacts.length;
+      }
+    }
+
+    document.getElementById('retryExportSync')?.addEventListener('click', () => {
+      if (retryExportSnapshot) syncDownloadedCampaign(retryExportSnapshot);
+    });
+    window.addEventListener('beforeunload', event => {
+      if (exportSyncPending || retryExportSnapshot) {
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    });
+
     function downloadVCF() {
+      if (exportSyncPending) return;
+      if (retryExportSnapshot) {
+        showExportSync('Save the previous downloaded campaign first. Retry saving below before exporting another batch.', 'error');
+        return;
+      }
       if (!contacts.length) {
         setStatus("There are no contacts to export", "error");
         return;
@@ -168,6 +217,11 @@ function cleanPhone(phone) {
         return;
       }
       const settings = getMarketingSettings();
+      const snapshot = {
+        settings: { ...settings },
+        contacts: contacts.filter(contact => contact.fullName && (contact.phone || contact.email))
+          .map(contact => ({ ...contact })),
+      };
       let filename = settings.event || "Marketing_Contacts";
       filename = filename.replace(/[^a-z0-9_-]/gi, "_").replace(/_+/g, "_") || "Marketing_Contacts";
 
@@ -200,6 +254,9 @@ function cleanPhone(phone) {
         window.setTimeout(() => URL.revokeObjectURL(url), 60000);
         setStatus(contacts.length + " contacts exported", "success");
       }
+      // Browsers cannot confirm that a file reached disk. Start saving only
+      // after requesting the download, keeping the iOS user gesture intact.
+      void syncDownloadedCampaign(snapshot);
     }
 
     function renderPreview() {
@@ -251,7 +308,7 @@ function cleanPhone(phone) {
 
     function updateDownloadState() {
       clearIOSDownloadLink();
-      downloadBtn.disabled = !contacts.length;
+      downloadBtn.disabled = exportSyncPending || !contacts.length;
     }
 
     function updateLiveUI() {

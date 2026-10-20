@@ -167,3 +167,9 @@ body .header-status-dot { background:#80509e !important; box-shadow:none !import
   body .mobile-bar { width:calc(100% - 24px) !important; margin-top:12px !important; padding:10px 14px !important; border-radius:22px !important; }
   body .mobile-brand { margin:auto; }
 }
+
+.export-sync-help { color:#656562; font-size:12px; line-height:1.6; }
+.export-sync-status { padding:14px 16px; border-radius:16px; background:#f4eff7; color:#593670; font-size:13px; line-height:1.6; }
+.export-sync-status[data-state="success"] { background:#edf6ef; color:#296244; }
+.export-sync-status[data-state="error"] { background:#fff0f1; color:#9d2530; }
+#exportSyncStatus[hidden], #retryExportSync[hidden] { display:none !important; }
