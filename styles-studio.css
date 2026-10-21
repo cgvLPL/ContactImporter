@@ -173,3 +173,6 @@ body .header-status-dot { background:#80509e !important; box-shadow:none !import
 .export-sync-status[data-state="success"] { background:#edf6ef; color:#296244; }
 .export-sync-status[data-state="error"] { background:#fff0f1; color:#9d2530; }
 #exportSyncStatus[hidden], #retryExportSync[hidden] { display:none !important; }
+
+/* Internal sync status is never part of the end-user navigation or display. */
+#backendSection { display:none !important; }

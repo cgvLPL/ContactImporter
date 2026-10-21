@@ -10,23 +10,12 @@
   const nav = document.querySelector('.nav');
   if (!tabStage || !nav) return;
 
-  const settingsButton = nav.querySelector('[data-target="settingsSection"]');
-  const backendButton = document.createElement('button');
-  backendButton.type = 'button';
-  backendButton.className = 'nav-item nav-button';
-  backendButton.dataset.target = 'backendSection';
-  backendButton.setAttribute('role', 'tab');
-  backendButton.setAttribute('aria-controls', 'backendSection');
-  backendButton.setAttribute('aria-selected', 'false');
-  backendButton.innerHTML = '<i data-lucide="database"></i><span>Backend</span>';
-
-  if (settingsButton) nav.insertBefore(backendButton, settingsButton);
-  else nav.appendChild(backendButton);
-
   const backendPanel = document.createElement('section');
-  backendPanel.className = 'tab-panel';
+  // Internal status nodes support sync operations but are not a user-facing tab.
+  backendPanel.className = 'backend-internal';
   backendPanel.id = 'backendSection';
-  backendPanel.setAttribute('role', 'tabpanel');
+  backendPanel.setAttribute('aria-hidden', 'true');
+  backendPanel.setAttribute('inert', '');
   backendPanel.setAttribute('aria-label', 'Google Sheets Backend');
   backendPanel.hidden = true;
   backendPanel.innerHTML = `
