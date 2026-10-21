@@ -13,7 +13,6 @@
     { target: 'importSection', label: 'Import', icon: 'file-spreadsheet', step: '2' },
     { target: 'contactsSection', label: 'Contacts', icon: 'users-round', step: '3' },
     { target: 'settingsSection', label: 'Export', icon: 'download', step: '4' },
-    { target: 'backendSection', label: 'Backend', icon: 'database', step: 'SYS' },
   ];
 
   const sidebarTitle = document.querySelector('.sidebar-section-title');
@@ -50,9 +49,6 @@
 
   const exportPanel = document.getElementById('settingsSection');
   if (exportPanel) exportPanel.setAttribute('aria-label', 'Export');
-
-  const backendPanel = document.getElementById('backendSection');
-  if (backendPanel) backendPanel.setAttribute('aria-label', 'Backend');
 
   // Mirror the same workflow on mobile, where the desktop sidebar is hidden.
   if (topbar && !document.querySelector('.mobile-workflow-tabs')) {

@@ -43,11 +43,6 @@
       eyebrow: 'Export · Step 4',
       title: 'Export campaign contacts',
       subtitle: 'Refresh the preview, download the current campaign as a VCF, or reset the active workspace.'
-    },
-    backendSection: {
-      eyebrow: 'System',
-      title: 'Google Sheets backend',
-      subtitle: 'Sync the active campaign or load campaign history from the permanent managed backend.'
     }
   };
 

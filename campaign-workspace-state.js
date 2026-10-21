@@ -138,7 +138,7 @@
         <button type="submit" class="glass-btn primary">Create campaign</button>
         <button type="button" class="glass-btn" id="campaignWelcomeHistory">Browse history</button>
       </div>
-      <p class="campaign-welcome-note">Downloading contacts automatically saves them to History. You can also sync from Backend.</p>
+      <p class="campaign-welcome-note">Downloading contacts automatically saves and syncs this campaign to History.</p>
     </form>
   `;
   document.body.appendChild(welcome);

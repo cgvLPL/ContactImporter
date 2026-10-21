@@ -213,3 +213,8 @@ Every page load opens an empty campaign workspace and prompts for a new campaign
 VCF and iOS ZIP downloads automatically save the exact exported contacts and campaign settings to Google Sheets, then refresh History. The download is requested before any network wait so Safari can retain its download user gesture. Browsers cannot confirm completion of a disk download; the UI reports “Download requested” separately from save success.
 
 If saving fails, the file download remains available. Keep the page open and choose **Retry saving campaign**, which retries the original exported batch even if the workspace has changed. A new export waits until the previous save has succeeded. Closing or refreshing with a pending/failed save prompts the browser's standard leave-page warning when supported. Retry data is kept in memory only.
+
+
+## End-user navigation
+
+The Backend menu is removed from desktop and mobile navigation. Internal connection/status nodes remain hidden and inert so background sync continues working. Downloading still saves campaigns automatically; Export provides save status and retry, while Campaign History supports viewing and re-downloading saved contacts. The internal panel is excluded from the tab system.
